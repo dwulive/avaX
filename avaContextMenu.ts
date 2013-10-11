@@ -1,4 +1,5 @@
-/**
+///<reference path="C:/source/qxEa.ts" />
+// /**
  * Created by David on 10/8/13.
  */
 function AvaContextMenuInit() {

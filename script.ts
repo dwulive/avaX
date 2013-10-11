@@ -1,4 +1,4 @@
-///<reference path="C:/source/Avajs/qxEa.js" />
+///<reference path="C:/source/qxEa.js" />
 //"use strict";
 // ==UserScript==
 // @name           Ava Tools
@@ -31,6 +31,7 @@
 
 
  **/
+
 (function() {
 
 
@@ -231,7 +232,8 @@
 				console.assert(0);
 				console.assert(0);
 			}
-		}; // avainit
+		}var CreateAvaTweak;
+		; // avainit
 		var avaDebug = true;
 
 		function paDebug(e) {
@@ -349,7 +351,7 @@
 		};
 
 
-		var CreateAvaTweak = function() {
+		CreateAvaTweak = function() {
 
 			qx.Class.define("ava.Version", {
 				type:    "static",

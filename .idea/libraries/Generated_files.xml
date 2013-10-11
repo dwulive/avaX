@@ -1,0 +1,27 @@
+<component name="libraryTable">
+  <library name="Generated files" type="javaScript">
+    <properties>
+      <sourceFilesUrls>
+        <item url="file://$PROJECT_DIR$/avaIncomming.js" />
+        <item url="file://$PROJECT_DIR$/avaUtil.js" />
+        <item url="file://$PROJECT_DIR$/script.js" />
+        <item url="file://$PROJECT_DIR$/avaIntel.js" />
+        <item url="file://$PROJECT_DIR$/avaRaid.js" />
+        <item url="file://$PROJECT_DIR$/avaContextMenu.js" />
+        <item url="file://$PROJECT_DIR$/avaTODO.js" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/avaQx.js" />
+      <root url="file://$PROJECT_DIR$/avaQx.js" />
+      <root url="file://$PROJECT_DIR$/avaIncomming.js" />
+      <root url="file://$PROJECT_DIR$/avaUtil.js" />
+      <root url="file://$PROJECT_DIR$/script.js" />
+      <root url="file://$PROJECT_DIR$/avaIntel.js" />
+      <root url="file://$PROJECT_DIR$/avaRaid.js" />
+      <root url="file://$PROJECT_DIR$/avaContextMenu.js" />
+      <root url="file://$PROJECT_DIR$/avaTODO.js" />
+    </CLASSES>
+    <SOURCES />
+  </library>
+</component>
