@@ -1,3 +1,5 @@
+//declare modulv\stqced_);;;;;;;;;;;e qx.locale {}
+//webfrontend.City
 /**
 * Created by David on 10/8/13.
 */
@@ -9,6 +11,7 @@ function AvaContextMenuInit() {
         if (l != "en" || l != "de" || l != "pl") {
             l = "en";
         }
+
         var tr = {
             "en": {
                 "weak": "Weakness"
@@ -110,11 +113,12 @@ else
                             //Boss
                             var weak = getBossWeakness(text.charAt(pBName));
                             var lPos = text.indexOf(levelT, pBName) + pLevel;
-                            var level = text.charAt(lPos);
+                            var level = text.charAt(lPos).toString();
                             if (level == '1') {
                                 if (text.charAt(lPos + 1) == '0')
                                     level = '10';
                             }
+
                             var zergs = webfrontend.gui.Util.formatNumbers(bossKill[parseInt(level) - 1]);
                             var sb = new qx.util.StringBuilder(20);
                             var research6 = webfrontend.data.Tech.getInstance().getBonus("unitDamage", webfrontend.data.Tech.research, 6);
@@ -138,24 +142,24 @@ else
                             var research17 = webfrontend.data.Tech.getInstance().getBonus("unitDamage", webfrontend.data.Tech.research, 17);
                             var shrine17 = webfrontend.data.Tech.getInstance().getBonus("unitDamage", webfrontend.data.Tech.shrine, 17);
                             var bonus17 = ((shrine17 + research17) / 100) + 1;
-                            var zergs6 = webfrontend.gui.Util.formatNumbers(parseInt(bossKill[parseInt(level) - 1] / bonus6));
+                            var zergs6 = webfrontend.gui.Util.formatNumbers((bossKill[parseInt(level, 10) - 1] / bonus6), null, null);
                             if (weak == "Infantry")
-                                zergs6 = webfrontend.gui.Util.formatNumbers(parseInt((bossKill[parseInt(level) - 1] / bonus6) * 0.67));
-                            var zergs7 = webfrontend.gui.Util.formatNumbers(parseInt(bossKill[parseInt(level) - 1] / bonus7) * 0.72);
+                                zergs6 = webfrontend.gui.Util.formatNumbers(((bossKill[parseInt(level) - 1] / bonus6) * 0.67), null, null);
+                            var zergs7 = webfrontend.gui.Util.formatNumbers((bossKill[parseInt(level) - 1] / bonus7) * 0.72, null, null);
                             if (weak == "Magic")
-                                zergs7 = webfrontend.gui.Util.formatNumbers(parseInt((bossKill[parseInt(level) - 1] / bonus7) * 0.67 * 0.72));
-                            var zergs10 = webfrontend.gui.Util.formatNumbers(parseInt((bossKill[parseInt(level) - 1] / bonus10) * 0.83));
+                                zergs7 = webfrontend.gui.Util.formatNumbers(((bossKill[parseInt(level) - 1] / bonus7) * 0.67 * 0.72), null, null);
+                            var zergs10 = webfrontend.gui.Util.formatNumbers(((bossKill[parseInt(level) - 1] / bonus10) * 0.83), null, null);
                             if (weak == "Cavalry")
-                                zergs10 = webfrontend.gui.Util.formatNumbers(parseInt((bossKill[parseInt(level) - 1] / bonus10) * 0.67 * 0.83));
-                            var zergs11 = webfrontend.gui.Util.formatNumbers(parseInt((bossKill[parseInt(level) - 1] / bonus11) * 0.55));
+                                zergs10 = webfrontend.gui.Util.formatNumbers(((bossKill[parseInt(level) - 1] / bonus10) * 0.67 * 0.83), null, null);
+                            var zergs11 = webfrontend.gui.Util.formatNumbers(((bossKill[parseInt(level) - 1] / bonus11) * 0.55), null, null);
                             if (weak == "Cavalry")
-                                zergs11 = webfrontend.gui.Util.formatNumbers(parseInt((bossKill[parseInt(level) - 1] / bonus11) * 0.67 * 0.55));
-                            var zergs12 = webfrontend.gui.Util.formatNumbers(parseInt((bossKill[parseInt(level) - 1] / bonus12) * 0.42));
+                                zergs11 = webfrontend.gui.Util.formatNumbers(((bossKill[parseInt(level) - 1] / bonus11) * 0.67 * 0.55), null, null);
+                            var zergs12 = webfrontend.gui.Util.formatNumbers(((bossKill[parseInt(level) - 1] / bonus12) * 0.42), null, null);
                             if (weak == "Magic")
-                                zergs12 = webfrontend.gui.Util.formatNumbers(parseInt((bossKill[parseInt(level) - 1] / bonus12) * 0.67 * 0.42));
+                                zergs12 = webfrontend.gui.Util.formatNumbers(((bossKill[parseInt(level) - 1] / bonus12) * 0.67 * 0.42), null, null);
                             if (weak == "Artillery") {
-                                var zergs16 = webfrontend.gui.Util.formatNumbers(parseInt((bossKill[parseInt(level) - 1] / bonus16) * 0.03));
-                                var zergs17 = webfrontend.gui.Util.formatNumbers(parseInt((bossKill[parseInt(level) - 1] / bonus17) * 0.003));
+                                var zergs16 = webfrontend.gui.Util.formatNumbers(((bossKill[parseInt(level) - 1] / bonus16) * 0.03), null, null);
+                                var zergs17 = webfrontend.gui.Util.formatNumbers(((bossKill[parseInt(level) - 1] / bonus17) * 0.003), null, null);
                                 sb.add(text, sHdr, weakT, weak, "</td></tr><tr><td>", zergT16, zergs16, "</td></tr><tr><td>", zergT17, zergs17, "</td></tr></table>");
                             } else {
                                 sb.add(text, sHdr, weakT, weak, "</td></tr><tr><td>", zergT6, zergs6, "</td></tr></td></tr><tr><td>", zergT10, zergs10, "</td></tr></td></tr><tr><td>", zergT11, zergs11, "</td></tr><tr><td>", zergT12, zergs12, "</td></tr><tr><td>", zergT7, zergs7, "</td></tr></table>");
@@ -165,7 +169,7 @@ else
                             //Dungeon
                             var weak = getDungeonWeakness(text.charAt(pDName));
                             var lPos = text.indexOf(levelT, pDName) + pLevel;
-                            var level = text.charAt(lPos);
+                            var level = text.charAt(lPos).toString();
                             if (level == '1') {
                                 if (text.charAt(lPos + 1) == '0')
                                     level = '10';
@@ -174,7 +178,7 @@ else
                             if (progress.substr(1, 1) == '%') {
                                 progress = progress.substr(0, 1);
                             }
-                            progress = webfrontend.gui.Util.formatNumbers(parseInt((progress * 0.0175 + 1.0875) * dungeonKill[parseInt(level) - 1]));
+                            progress = webfrontend.gui.Util.formatNumbers(((progress * 0.0175 + 1.0875) * dungeonKill[parseInt(level) - 1]));
                             zergs6 = webfrontend.gui.Util.formatNumbers(dungeonKill[parseInt(level) - 1]);
                             var sb = new qx.util.StringBuilder(20);
                             sb.add(text, sHdr, weakT, weak, "</td></tr><tr><td>", zergT, zergs6, "</td></tr><tr><td>", progressT, progress, "</td></tr></table>");

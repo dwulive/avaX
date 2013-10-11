@@ -4,8 +4,12 @@
       <sourceFilesUrls>
         <item url="file://$PROJECT_DIR$/avaIncomming.js" />
         <item url="file://$PROJECT_DIR$/avaUtil.js" />
+        <item url="file://$PROJECT_DIR$/avaChat.js" />
+        <item url="file://$PROJECT_DIR$/qx/qxEa.js" />
+        <item url="file://$PROJECT_DIR$/webfrontend/webfrontendEa.js" />
         <item url="file://$PROJECT_DIR$/script.js" />
         <item url="file://$PROJECT_DIR$/avaIntel.js" />
+        <item url="file://$PROJECT_DIR$/avaDec.js" />
         <item url="file://$PROJECT_DIR$/avaRaid.js" />
         <item url="file://$PROJECT_DIR$/avaContextMenu.js" />
         <item url="file://$PROJECT_DIR$/avaTODO.js" />
@@ -14,10 +18,15 @@
     <CLASSES>
       <root url="file://$PROJECT_DIR$/avaQx.js" />
       <root url="file://$PROJECT_DIR$/avaQx.js" />
+      <root url="file://$PROJECT_DIR$/qxEa.js" />
       <root url="file://$PROJECT_DIR$/avaIncomming.js" />
       <root url="file://$PROJECT_DIR$/avaUtil.js" />
+      <root url="file://$PROJECT_DIR$/avaChat.js" />
+      <root url="file://$PROJECT_DIR$/webfrontend/webfrontendEa.js" />
+      <root url="file://$PROJECT_DIR$/qx/qxEa.js" />
       <root url="file://$PROJECT_DIR$/script.js" />
       <root url="file://$PROJECT_DIR$/avaIntel.js" />
+      <root url="file://$PROJECT_DIR$/avaDec.js" />
       <root url="file://$PROJECT_DIR$/avaRaid.js" />
       <root url="file://$PROJECT_DIR$/avaContextMenu.js" />
       <root url="file://$PROJECT_DIR$/avaTODO.js" />

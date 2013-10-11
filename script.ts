@@ -1,5 +1,5 @@
-///<reference path="C:/source/qxEa.js" />
-//"use strict";
+///<reference path="qx/qxEa.d.ts" />
+///<reference path="webfrontend/webfrontendEa.d.ts" />
 // ==UserScript==
 // @name           Ava Tools
 // @description    Ava Tools - script for fun and good times
@@ -7,6 +7,10 @@
 // @include        http://prodgame*.lordofultima.com/*/index.aspx*
 // @version        1024.0.0.4
 // ==/UserScript==
+
+declare var qx : any;
+declare var webfrontend : any;
+
 /**
  * 5.2.1 - Go button stayed disabled for some "cancel raids" options.
  * 5.2.2 - Additional case where Go button stayed disabled with "cancel all".
@@ -15281,8 +15285,8 @@
 		console.warn('Injecting fun fun fun script');
 		var script = document.createElement("script");
 		var txt = main.toString();
-		if(window.opera != undefined)
-			txt = txt.replace(/</g, "&lt;");
+	//	if(window.opera != undefined)
+//			txt = txt.replace(/</g, "&lt;");
 		script.innerHTML = "(" + txt + ")();";
 		script.type = "text/javascript";
 		document.getElementsByTagName("head")[0].appendChild(script);
