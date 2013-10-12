@@ -4,10 +4,15 @@
     <connections />
   </component>
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$" />
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/modules" />
+    </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="qxEA" level="application" />
+    <orderEntry type="library" name="qxEA" level="application" />
+    <orderEntry type="library" name="Generated files" level="project" />
+    <orderEntry type="library" name="Node.js v0.10.20 Core Modules" level="application" />
   </component>
 </module>
 

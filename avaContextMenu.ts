@@ -1,14 +1,6 @@
-////<reference path="qx/qxEa.d.ts" />
-////<reference path="webfrontend/webfrontendEa.d.ts" />
 ///<reference path="avaDec.ts" />
-
-//
-//
-
-//import webfrontend = require("webfrontend/webfrontendEa");
-//declare module qx {}
 declare var qx : any;
-declare var webfrontend : any;
+
 //declare modulv\stqced_);;;;;;;;;;;e qx.locale {}
 //webfrontend.City
 /**
@@ -17,7 +9,6 @@ declare var webfrontend : any;
 function AvaContextMenuInit() {
 
 	try {
-
 		var bossKill = [50, 300, 2000, 4000, 10000, 15000, 20000, 30000, 45000, 60000];
 		var dungeonKill = [10, 100, 450, 1500, 3500, 6000, 13000, 20000, 35000, 60000];
 		var l =qx.locale.Manager.getInstance().getLocale();
