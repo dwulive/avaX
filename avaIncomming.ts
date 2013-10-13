@@ -1,4 +1,4 @@
-///<reference path="../avaDec.ts" />
+///<reference path="avaDec.ts" />
 declare var qx : any;
 
 //
@@ -6,8 +6,12 @@ declare var qx : any;
  * Created by David on 10/8/13.
  */
 
+ function Mod10(i) {
+    return i = Math.floor(i/10) * 10;
+ }
+
  function checkTime(i) {
-	 if(i < 10) {
+	  if(i < 10) {
 		 i = "0" + i;
 	 }
 	 return i;
@@ -62,123 +66,65 @@ function formatReportId(reportId) {
 	return retVal;
 }
 
+var citySort = null;
 var sendCnt = 0;
-var nfTime = null;
-var nextFortune = null;
-var fortuneCheck = null;
-var lastDisplay = new Date();
-var ftDisplay = false;
-lastDisplay.setTime((new Date()).getTime() + webfrontend.data.ServerTime.getInstance().getServerOffset() - (-new Date().getTimezoneOffset() * 60000) - 300000);
 var serverTime = webfrontend.data.ServerTime.getInstance();
 var player = webfrontend.data.Player.getInstance();
 var aco = webfrontend.data.Alliance.getInstance();
 var bw = webfrontend.ui.BrandBoostWrapper.getInstance();
+var subIncomingOffImg = null;
+var subIncomingImg = null;
+var subNames = null;
+var _oTech = null;
 
-function checkFortuneTime() {
-	var tokenStep = player.getFortuneNextFreeTokenStep();
-	var serverDiff = webfrontend.data.ServerTime.getInstance().getDiff();
-	var timeZoneOffset = webfrontend.config.Config.getInstance().getTimeZoneOffset();
-	var serverOffset = webfrontend.data.ServerTime.getInstance().getServerOffset();
-	var localOffset = -new Date().getTimezoneOffset() * 60000;
-	fortuneCheck = serverTime.getStepTime(tokenStep);
-	fortuneCheck.setTime(fortuneCheck.getTime() + serverOffset - localOffset);
+function checkForSubAttacks(results, thisObj) {
+	try {
+		var hasAttacks = "";
+		var IncomingAttacks;
+		if(results != null) {
+			if(results.hasOwnProperty("a")) {
+				IncomingAttacks = results.a;
+			} else {
+				if(results[0].hasOwnProperty("a"))
+					IncomingAttacks = results[0].a;
+			}
+			if(IncomingAttacks != null) {
+				for(var ii = 0; ii < subNames.length; ++ii) {
+					for(var i = 0; i < IncomingAttacks.length; ++i) {
+						if(IncomingAttacks[i].tpn.toLowerCase() == subNames[ii]) {
+							hasAttacks += (hasAttacks.length > 0 ? ", " : "") + subNames[ii];
+							break;
+						}
+					}
+				}
+			}
+		}
+		if(hasAttacks.length > 0) {
+			if(subIncomingImg.getToolTipText() != "Incoming for " + hasAttacks) {
+				subIncomingImg.setSource('resource/webfrontend/ui/icons/icon_attack_warning.gif');
+				subIncomingImg.setToolTipText("Incoming for " + hasAttacks);
+			}
+		} else {
+			if(subIncomingImg.getToolTipText() != "Incoming for " + hasAttacks) {
+				subIncomingImg.setSource('resource/webfrontend/ui/icons/icon_alliance_outgoing_attack_warning_inactive.png');
+				var sub = subNames.join(',');
+				subIncomingImg.setToolTipText("No incomings for " + sub);
+			}
+		}
+		if(subIncomingImg.getVisibility() != "visible") {
+			subIncomingImg.setVisibility("visible");
+		}
+	} catch(ex) {
+		paDebug(ex);
+	}
+	/* (e) {
+	 console.debug("Error");
+	 console.dir(e);
+	 } */
 }
 
-function setNextFortuneTime() {
-	var tokenStep = player.getFortuneNextFreeTokenStep();
-	var serverDiff = webfrontend.data.ServerTime.getInstance().getDiff();
-	var timeZoneOffset = webfrontend.config.Config.getInstance().getTimeZoneOffset();
-	var serverOffset = webfrontend.data.ServerTime.getInstance().getServerOffset();
-	var localOffset = -new Date().getTimezoneOffset() * 60000;
-	nextFortune = serverTime.getStepTime(tokenStep);
-	nextFortune.setTime(nextFortune.getTime() + serverOffset - localOffset);
-	var h = nextFortune.getHours();
-	var m = nextFortune.getMinutes();
-	var s = nextFortune.getSeconds();
-	h = checkTime(h);
-	m = checkTime(m);
-	s = checkTime(s);
-	nfTime = h + ':' + m + ':' + s;
-}
 
-
-
-function showFortuneWindow(msgText) {
-	var win = new qx.ui.window.Window("Fortune Teller");
-	win.setLayout(new qx.ui.layout.VBox(2));
-	win.set({
-		showMaximize:  false,
-		showMinimize:  false,
-		allowMaximize: false,
-		width:         400,
-		height:        80
-	});
-	win.lbl = new qx.ui.basic.Label(msgText).set({
-		rich: true
-	});
-	win.add(win.lbl);
-	var row = new qx.ui.container.Composite(new qx.ui.layout.HBox(2));
-	win.add(row);
-	var btn = new qx.ui.form.Button("Open FT").set({
-		appearance:    "button-text-small",
-		width:         80,
-		paddingLeft:   5,
-		paddingRight:  5,
-		paddingTop:    0,
-		paddingBottom: 0
-	});
-	btn.win = win;
-	row.add(btn);
-	btn.addListener("click", function() {
-		(new webfrontend.gui.FortuneTeller.MainWindow()).open();
-		this.win.hide();
-	});
-	var btn2 = new qx.ui.form.Button("Close").set({
-		appearance:    "button-text-small",
-		width:         80,
-		paddingLeft:   5,
-		paddingRight:  5,
-		paddingTop:    0,
-		paddingBottom: 0
-	});
-	btn2.win = win;
-	row.add(btn2);
-	btn2.addListener("click", function() {
-		var serverOffset = webfrontend.data.ServerTime.getInstance().getServerOffset();
-		var localOffset = -new Date().getTimezoneOffset() * 60000;
-		lastDisplay.setTime((new Date()).getTime() + serverOffset - localOffset);
-		ftDisplay = false;
-		this.win.hide();
-	});
-	var btn3 = new qx.ui.form.Button("Ignore").set({
-		appearance:    "button-text-small",
-		width:         80,
-		paddingLeft:   5,
-		paddingRight:  5,
-		paddingTop:    0,
-		paddingBottom: 0
-	});
-	btn3.win = win;
-	row.add(btn3);
-	btn3.addListener("click", function() {
-		var serverOffset = webfrontend.data.ServerTime.getInstance().getServerOffset();
-		var localOffset = -new Date().getTimezoneOffset() * 60000;
-		lastDisplay.setTime((new Date()).getTime() + serverOffset - localOffset + 7200000);
-		ftDisplay = true;
-		this.win.hide();
-	});
-	win.addListener("close", function() {
-		var serverOffset = webfrontend.data.ServerTime.getInstance().getServerOffset();
-		var localOffset = -new Date().getTimezoneOffset() * 60000;
-		lastDisplay.setTime((new Date()).getTime() + serverOffset - localOffset);
-		ftDisplay = false;
-	}, this);
-
-	win.center();
-	win.open();
-}
-
-qx.Class.define("ava.ui.IncomingAttacksWindow", {
+qx.Class.define("ava.IncomingAttacksWindow", {
 	type:      "singleton",
 	//       extend : qx.ui.table.simple.Simple,
 	extend:    qx.ui.window.Window,
@@ -220,14 +166,15 @@ qx.Class.define("ava.ui.IncomingAttacksWindow", {
 					var diffMs = ((sec * 1000) / dist);
 					var diffSec = Math.ceil(diffMs / 1000);
 					var ship = Math.round((Math.round((5 / (diffSec / 60) - 1) * 100) * 10) / 10);
-					var iaw = ava.ui.IncomingAttacksWindow.getInstance();
+					var iaw = ava.IncomingAttacksWindow.getInstance();
 					if(iaw._allianceBonuses.hasOwnProperty(aid)) {
 						ship -= (iaw._allianceBonuses[aid].sse);
 					}
+					var strShip;
 					if((ship == 0) || (ship == 1) || (ship == 3) || (ship == 6) || (ship > 6 && ship <= 50 && ((ship % 5) == 0))) {
-						ship = "Ships possible if attacking player has " + ship + "% travel speed research.";
+						strShip = "Ships possible if attacking player has " + ship + "% travel speed research.";
 					} else {
-						ship = "Not ships, player would need " + ship + "% travel speed research.";
+						strShip = "Not ships, player would need " + ship + "% travel speed research.";
 					}
 					var win = new qx.ui.window.Window("Check ship attack");
 					win.setLayout(new qx.ui.layout.VBox(2));
@@ -239,7 +186,7 @@ qx.Class.define("ava.ui.IncomingAttacksWindow", {
 						height:        80
 					});
 
-					win.lbl = new qx.ui.basic.Label(ship).set({
+					win.lbl = new qx.ui.basic.Label(strShip).set({
 						rich: true
 					});
 
@@ -309,6 +256,7 @@ qx.Class.define("ava.ui.IncomingAttacksWindow", {
 			this.getAllianceBonuses();
 			var app = qx.core.Init.getApplication();
 			this.serverTime = webfrontend.data.ServerTime.getInstance();
+			var _mtPn = player.getName();
 			this.pName = _mtPn;
 			this.setLayout(new qx.ui.layout.VBox(10));
 			this.set({
@@ -473,10 +421,10 @@ qx.Class.define("ava.ui.IncomingAttacksWindow", {
 					{
 						spl = spl.split(":");
 						if(spl.length > 1) {
-							var x = Number(spl[0]);
-							var y = Number(spl[1]);
+							var _x = Number(spl[0]);
+							var _y = Number(spl[1]);
 							var app = qx.core.Init.getApplication();
-							webfrontend.gui.Util.showMapModeViewPos('r', 0, x, y);
+							webfrontend.gui.Util.showMapModeViewPos('r', 0, _x, _y);
 						}
 					}
 						break;
@@ -540,6 +488,7 @@ qx.Class.define("ava.ui.IncomingAttacksWindow", {
 			var hasNames = false;
 			var sub = this._subText.getValue();
 			localStorage.setItem("mt__subValues", sub);
+			var subnNames= {};
 			if(sub.length > 0) {
 				//noinspection ReuseOfLocalVariableJS
 				subNames = sub.split(/[,;]/g);
@@ -913,7 +862,7 @@ qx.Class.define("ava.ui.IncomingAttacksWindow", {
 						delay += 1000;
 						window.setTimeout(thisObj.isOnWater.bind(thisObj, item.c, thisObj), delay);
 						delay += 1000;
-						var cont = ava.CombatTools.cityIdToCont(item.tc);
+						var cont1 = ava.CombatTools.cityIdToCont(item.tc);
 						var cont2 = ava.CombatTools.cityIdToCont(item.c);
 						var tcCoords = ava.CoordUtils.convertIdToCoodrinates(item.tc).split(":");
 						var cCoords = ava.CoordUtils.convertIdToCoodrinates(item.c).split(":");
@@ -930,12 +879,12 @@ qx.Class.define("ava.ui.IncomingAttacksWindow", {
 						var IncomingShip = "?";
 
 						try {
-							IncomingScout = Math.round((Math.round((8 / (diffSec / 60) - 1) * 100) * 10) / 10);
-							IncomingCav = Math.round((Math.round((10 / (diffSec / 60) - 1) * 100) * 10) / 10);
-							IncomingInf = Math.round((Math.round((20 / (diffSec / 60) - 1) * 100) * 10) / 10);
-							IncomingSiege = Math.round((Math.round((30 / (diffSec / 60) - 1) * 100) * 10) / 10);
-							IncomingBaron = Math.round((Math.round((40 / (diffSec / 60) - 1) * 100) * 10) / 10);
-							IncomingShip = (cont != cont2) ? "*" : "?";
+							var IncomingScout : any = Math.round((Math.round((8 / (diffSec / 60) - 1) * 100) * 10) / 10);
+							var IncomingCav: any = Math.round((Math.round((10 / (diffSec / 60) - 1) * 100) * 10) / 10);
+							var IncomingInf: any = Math.round((Math.round((20 / (diffSec / 60) - 1) * 100) * 10) / 10);
+							var IncomingSiege: any = Math.round((Math.round((30 / (diffSec / 60) - 1) * 100) * 10) / 10);
+							var IncomingBaron: any = Math.round((Math.round((40 / (diffSec / 60) - 1) * 100) * 10) / 10);
+							 IncomingShip = (cont1 != cont2) ? "*" : "?";
 							var foundType = false;
 							var aid = item.a.toString();
 							if(thisObj._allianceBonuses.hasOwnProperty(aid)) {

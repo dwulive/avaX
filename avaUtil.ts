@@ -109,6 +109,7 @@ function paDebug(e) {
 function paError(e) {
 	if(window.console && typeof console.error == "function") {
 		console.error(e);
+		console.trace();
 		console.assert(false);
 	}
 }
@@ -368,12 +369,6 @@ function removeConsumer(msg, func, _this) {
 	}
 }
 
-function leftPad(num, minsize, padstring) {
-	var str = num.toString();
-	while(str.length < minsize)
-		str = padstring + str;
-	return str;
-}
 
 function unitShortName(unitType) {
 	switch(unitType) {

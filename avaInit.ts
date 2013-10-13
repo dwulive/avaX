@@ -5,16 +5,26 @@ calls ctors and such
 ///<reference path="avaDec.ts" />
 declare var qx : any;
 declare var window : any;
+declare function AvaInit();
 
 
-(function ()
-{
+var SCOUT_ORDER_ID = 1;
+var 	PLUNDER_ORDER_ID = 2;
+var 	ATTACK_ORDER_ID = 3;
+var 	SUPPORT_ORDER_ID = 4;
+var 	SIEGE_ORDER_ID = 5;
+var 	RAID_ORDER_ID = 8;
+var 	SETTLE_ORDER_ID = 9;
+var 	ORDER_STATE_OUTGOING = 1;
+var 	ORDER_STATE_RETURNING = 2;
+
 
 	// globals
 	qx.Class.define("ava.Main", {
 		type:    "singleton",
 		extend:  qx.core.Object,
-		members: {
+				members: {
+			civ_cont : {} ,
 			options:                    null,
 			SEND_WOOD:                  1,
 			SEND_STONE:                 2,
@@ -28,12 +38,6 @@ declare var window : any;
 				"14": true,
 				"2":  true
 			},
-			SCOUT_ORDER_ID:             1,
-			PLUNDER_ORDER_ID:           2,
-			ATTACK_ORDER_ID:            3,
-			SUPPORT_ORDER_ID:           4,
-			SIEGE_ORDER_ID:             5,
-			RAID_ORDER_ID:              8,
 			_city:                      null,
 			reportExtraInfo:            null,
 			coord:                      null,
@@ -46,33 +50,7 @@ declare var window : any;
 			RETURN_TIME_INDEX:          3,
 			CMD_LIST_INDEX:             1,
 			cityBuildings:              null,
-			initialize:                 function() {
-				paDebug("ava initialize");
-				this.app = qx.core.Init.getApplication();
-				this.cInfoView = this.app.getCityInfoView();
-				this.chat = this.app.chat;
-				this.bQc = this.cInfoView.buildingQueue;
-				this.bQh = this.bQc.header;
-				this.playerName = webfrontend.data.Player.getInstance().getName();
-				var civ_cont = this.cInfoView.container.getChildren();
-				this.loadOptions();
 
-				for(var i = 0; i < civ_cont.length; i++) {
-					if(civ_cont[i].basename == "CityCommandInfoView") {
-						this.cCmdInfoView = civ_cont[i];
-						break;
-					}
-				}
-				var commands = this.cCmdInfoView.commands;
-				commands.addListener("addChildWidget", this.onAddChildWidget, this);
-				var children = commands.getChildren();
-				for(var i = 0; i < children.length; i++) {
-					var e = new qx.event.type.Data();
-					e.init(children[i], null, false);
-					this.onAddChildWidget(e);
-				}
-				this.tweakPA();
-			},
 			onAddChildWidget:           function(e) {
 				var widget = e.getData();
 				var optionsPanel = widget.getChildren()[4].getChildren()[1].getChildren()[2];
@@ -209,16 +187,41 @@ declare var window : any;
 				localStorage.setItem("Ava_options", str);
 				console.log("loaded");
 			},
-			tweakPA:                    function() {
-				console.log("TweakPA start");
+					initialize : function() {
+						paDebug("ava initialize");
+						this.app = qx.core.Init.getApplication();
+						this.cInfoView = this.app.getCityInfoView();
+						this.chat = this.app.chat;
+						this.bQc = this.cInfoView.buildingQueue;
+						this.bQh = this.bQc.header;
+						this.playerName = webfrontend.data.Player.getInstance().getName();
+						civ_cont = this.cInfoView.container.getChildren();
+						this.loadOptions();
+
+						for(var i = 0; i < civ_cont.length; i++) {
+							if(civ_cont[i].basename == "CityCommandInfoView") {
+								this.cCmdInfoView = civ_cont[i];
+								break;
+							}
+						}
+						var commands = this.cCmdInfoView.commands;
+						commands.addListener("addChildWidget", this.onAddChildWidget, this);
+						var children = commands.getChildren();
+						for(var i = 0; i < children.length; i++) {
+							var e = new qx.event.type.Data();
+							e.init(children[i], null, false);
+							this.onAddChildWidget(e);
+						}
+
+
 
 				// Create a toolbar in the main area on the left below existing forms.
-				this.panel = new ava.ui.ExtraTools("- 343i  " + ava.Version.PAversion);
+				this.panel = new ava.ExtraTools("- 343i  " + ava.Version.PAversion);
 				this.addPanel(this.panel);
 				this._city = this.panel.city;
 
 				// Cancel Orders
-				this.cancelOrders = new ava.ui.CancelOrderPanel();
+				this.cancelOrders = new ava.CancelOrderPanel();
 				console.log("TweakPA1");
 				this.cCmdInfoView.commandHeaderData.header.add(this.cancelOrders, {
 					left: 155,
@@ -229,7 +232,7 @@ declare var window : any;
 				this.chat = this.app.chat;
 				var cityStatusRow;
 				var cityStatusText;
-				ava.ui.alerts.getInstance().init();
+				ava.alerts.getInstance().init();
 
 				try {
 					/*
@@ -264,19 +267,19 @@ declare var window : any;
 					row.setLayout(new qx.ui.layout.HBox(4));
 					targetContainer.add(row);
 					var assaultButton = new qx.ui.form.Button("Attack");
-					assaultButton.orderId = this.ATTACK_ORDER_ID;
+					assaultButton.orderId = ATTACK_ORDER_ID;
 					assaultButton.setToolTipText("Assault selected city with all Available units");
 					assaultButton.addListener("execute", this.sendTroops, this);
 					var plunderButton = new qx.ui.form.Button("Plunder");
-					plunderButton.orderId = this.PLUNDER_ORDER_ID;
+					plunderButton.orderId = PLUNDER_ORDER_ID;
 					plunderButton.setToolTipText("Plunder selected city with all Available units");
 					plunderButton.addListener("execute", this.sendTroops, this);
 					var siegeButton = new qx.ui.form.Button("Siege");
-					siegeButton.orderId = this.SIEGE_ORDER_ID;
+					siegeButton.orderId = SIEGE_ORDER_ID;
 					siegeButton.setToolTipText("Siege selected city with all Available units");
 					siegeButton.addListener("execute", this.sendTroops, this);
 					var supportButton = new qx.ui.form.Button("Support");
-					supportButton.orderId = this.SUPPORT_ORDER_ID;
+					supportButton.orderId = SUPPORT_ORDER_ID;
 					supportButton.setToolTipText("Support selected city with all Available units");
 					supportButton.addListener("execute", this.sendTroops, this);
 
@@ -306,21 +309,20 @@ declare var window : any;
 					targetContainer.add(cityStatusRow);
 					// mkReq();  // @@@
 				} catch(e) {
-					console.assert(false);
-					console.assert(false);
+					paError(e);
+
 				}
 				try {
-					this.reportExtraInfo = ava.ui.RaidReporter.getInstance();
+					this.reportExtraInfo = ava.RaidReporter.getInstance();
 					var rep = app.getReportPage();
 					rep.origOnReport = rep._onReport;
 					rep._onReport = this.reportExtraInfo.interceptOnReport;
 				} catch(e) {
-					console.assert(false);
-					console.assert(false);
+					paError(false);
 				}
 				try {
 					this.cInfoView = this.app.getCityInfoView();
-					var civ_cont = this.cInfoView.container.getChildren();
+					civ_cont = this.cInfoView.container.getChildren();
 
 					for(var i = 0; i < civ_cont.length; i++) {
 						if(civ_cont[i].basename == "CityCommandInfoView") {
@@ -359,8 +361,7 @@ declare var window : any;
 					scrollBtn.addListener("click", this.scrollToBottom, false);
 					btnRow.add(scrollBtn);
 				} catch(e) {
-					console.assert(false);
-					console.assert(false);
+					paError(e);
 				}
 				/* (e) {
 				 console.log("Error");
@@ -371,13 +372,13 @@ declare var window : any;
 				this.createContextMenu();
 				ava.Inception.getInstance().init();
 				ava.Chat.getInstance().init();
-				this.emotifyIcons();
+				emotifyIcons();
 				ava.Chat.getInstance().addChatMessage(" is not broken :) - good times for all", true);
 				this.panel.showOptionsPage();
 				qx.core.Init.getApplication().switchOverlay(null);
 
 				// City Buildings
-				this.cityBuildings = new ava.ui.CityBuildings();
+				this.cityBuildings = new ava.CityBuildings();
 				this.panel.getLayoutParent().addBefore(this.cityBuildings.bldgsCont, this.panel);
 				webfrontend.data.City.getInstance().addListener("changeVersion", this.cityBuildings.updateCityBuildings, this.cityBuildings);
 				this.app.visMain.addListener("changeMapLoaded", function() {
@@ -549,11 +550,11 @@ declare var window : any;
 				qx.core.Init.getApplication().worldView.addListener("beforeContextmenuOpen", function(e) {
 					this.updateWorldViewContext();
 				}, this);
-				this.plunderBtn.orderId = this.PLUNDER_ORDER_ID;
+				this.plunderBtn.orderId = PLUNDER_ORDER_ID;
 				this.plunderBtn.addListener("execute", this.sendTroops, this);
-				this.scoutBtn.orderId = this.SCOUT_ORDER_ID;
+				this.scoutBtn.orderId = SCOUT_ORDER_ID;
 				this.scoutBtn.addListener("execute", this.sendTroops, this);
-				this.supportBtn.orderId = this.SUPPORT_ORDER_ID;
+				this.supportBtn.orderId = SUPPORT_ORDER_ID;
 				this.supportBtn.addListener("execute", this.sendTroops, this);
 				this.sendArmyBtn.addListener("execute", function(e) {
 					if(this.coord) {
@@ -561,7 +562,7 @@ declare var window : any;
 					}
 				}, this);
 				this.killBossBtn.addListener("execute", function(e) {
-					var rw = ava.ui.RaidingWindow.getInstance();
+					var rw = ava.RaidingWindow.getInstance();
 					var rt = rw.pickBossRaider().t;
 					var o = new Object();
 					o.BossType = getBossType(this.coord.playerName);
@@ -609,7 +610,7 @@ declare var window : any;
 				}, this);
 				this.raidDungeonBtn.addListener("execute", function(e) {
 					if(this.coord && this.coord.dungeon) {
-						var dialog = ava.ui.RaidingWindow.getInstance();
+						var dialog = ava.RaidingWindow.getInstance();
 						var w = qx.bom.Viewport.getWidth(window);
 						var h = qx.bom.Viewport.getHeight(window);
 						var wh = Math.floor(h * 0.45);
@@ -789,12 +790,10 @@ declare var window : any;
 						var commandManager = webfrontend.net.CommandManager.getInstance();
 						commandManager.sendCommand("OrderUnits", request, this, this.sentTroops);
 					} catch(err) {
-						console.assert(false);
-						console.assert(false);
+						paError(err);
 					}
 				} catch(e) {
-					console.assert(false);
-					console.assert(false);
+					paError(e);
 				}
 
 			},
@@ -819,8 +818,8 @@ declare var window : any;
 						}
 					}
 				} catch(e) {
-					console.assert(false);
-					console.assert(false);
+					paError(e);
+
 				}
 				/* (e) {
 				 console.log("Error");
@@ -969,8 +968,12 @@ declare var window : any;
 			},
 			addPanel:                   function(panel) {
 				this.bQc.getLayoutParent().addBefore(panel, this.bQc);
-			},
+			}
 
 
 		}
-	})})();
+	});
+AvaInitLegacy();
+avaInitRaids();
+
+ava.Main.getInstance().initialize();

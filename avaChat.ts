@@ -182,7 +182,7 @@ function emotify(txt, callback = null) : any
 
 }
 
-qx.Class.define("ava.ui.alerts", {
+qx.Class.define("ava.alerts", {
 	type:      "singleton",
 	extend:    qx.core.Object,
 	construct: function(enabled) {

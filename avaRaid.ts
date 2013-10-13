@@ -5,7 +5,41 @@
 declare var qx : any;
 declare var webfrontend : any;
 
-function AvaInit() {
+function leftPad(num, minsize, padstring) {
+	var str = num.toString();
+	while(str.length < minsize)
+		str = padstring + str;
+	return str;
+}
+function RaidingWindowEnumProperties(rw,func)
+{
+	for(var i in rw )
+	{
+	 if( rw.propertyIsEnumerable(i)
+	 && (typeof rw[i] == "number"||typeof rw[i]=="string")
+	 && i[0] != '$' && i[0] != '_' )
+	 {
+	    func(rw, i);;
+	 }
+	}
+};
+function GetStoreName( rw , i : string ) : string
+{
+  var rv =  "_s_" + rw.className() + "_" + i.toString();
+  	console.log(rv);
+	return rv;
+}
+
+function RaidingWindowSave(rw)
+{
+	RaidingWindowEnumProperties( rw, function(rw,i) { localStorage.setItem(GetStoreName(rw,i), rw[i]);  } );
+}
+function RaidingWindowLoad(rw)
+{
+	RaidingWindowEnumProperties( rw, function(rw,i) { var temp = localStorage.getItem(GetStoreName(rw,i) );  if(temp!=null) rw[i]=temp;  } );
+}
+
+function avaInitRaids() {
 	try {
 		var bossKill = [50, 300, 2000, 4000, 10000, 15000, 20000, 30000, 45000, 60000];
 		var dungeonKill = [10, 100, 450, 1500, 3500, 6000, 13000, 20000, 35000, 60000];
@@ -163,19 +197,18 @@ function AvaInit() {
 					}
 				}
 			} catch(e) {
-				console.assert(false);
-				console.assert(false);
+				paError(e);
+
 			}
 		}
 
 		a.worldViewToolTip.addListener("appear", toolTipAppear, this);
 	} catch(e) {
-		console.assert(false);
-		console.assert(false);
+		paError(e);
 	}
 }
 
-qx.Class.define("ava.ui.RaidReporter", {
+qx.Class.define("ava.RaidReporter", {
 	type:    "singleton",
 	extend:  qx.core.Object,
 	statics: {
@@ -280,8 +313,8 @@ qx.Class.define("ava.ui.RaidReporter", {
 											if(!kp.units.hasOwnProperty(unitType))
 												continue;
 											var unitData = kp.units[unitType];
-											if(ava.ui.RaidReporter.dungeonLoot.hasOwnProperty(unitData.dn)) {
-												maxLoot += ava.ui.RaidReporter.dungeonLoot[unitData.dn] * ko.u[unitIndex].o;
+											if(ava.RaidReporter.dungeonLoot.hasOwnProperty(unitData.dn)) {
+												maxLoot += ava.RaidReporter.dungeonLoot[unitData.dn] * ko.u[unitIndex].o;
 												armies[unitIndex] = {};
 												armies[unitIndex].armytype = unitData.dn;
 												armies[unitIndex].armysize = ko.u[unitIndex].o;
@@ -392,7 +425,7 @@ qx.Class.define("ava.ui.RaidReporter", {
 							marginTop:       6
 						}), i++);
 						if(hasDungeonLoot) {
-							var rw = ava.ui.RaidingWindow.getInstance();
+							var rw = ava.RaidingWindow.getInstance();
 							if(rw.curDungeon != null && rw.curDungeon.get_Coordinates() == dungCoords) {
 								if(rw.dungeonLootInfo.hasOwnProperty(dungCoords)) {
 									var info = rw.dungeonLootInfo[dungCoords];
@@ -422,7 +455,7 @@ qx.Class.define("ava.ui.RaidReporter", {
 		}
 	}
 });
-qx.Class.define("ava.ui.LastLogin", {
+qx.Class.define("ava.LastLogin", {
 	type:      "singleton",
 	extend:    qx.ui.window.Window,
 	construct: function() {
@@ -569,7 +602,7 @@ qx.Class.define("ava.ui.LastLogin", {
 	}
 });
 
-qx.Class.define("ava.ui.FillWithResourcesWindow", {
+qx.Class.define("ava.FillWithResourcesWindow", {
 	type:      "singleton",
 	extend:    qx.ui.window.Window,
 	construct: function() {
@@ -963,7 +996,220 @@ qx.Class.define("ava.ui.FillWithResourcesWindow", {
 
 var distWantModifier = 0.675;
 
-qx.Class.define("ava.ui.RaidingWindow", {
+qx.Class.define("ava.IdleRaidUnitsTable", {
+	extend:    qx.ui.table.Table,
+	implement: [webfrontend.net.IUpdateConsumer],
+	type:      "singleton",
+	construct: function() {
+		console.debug("Idel raid Units ctor");
+		var tableModel = new qx.ui.table.model.Simple();
+		var columnNames = ["CityID", "TS", "Type", "City", "Ref", "Cont", "Coords", "%TS"];
+		tableModel.setColumns(columnNames);
+		var custom = {
+			tableColumnModel: function(obj) {
+				return new qx.ui.table.columnmodel.Resize(obj);
+			}
+		};
+		qx.ui.table.Table.call(this, tableModel, custom);
+		this.addListener("cellClick", this.onCellClick, this);
+		var columnModel = this.getTableColumnModel();
+		columnModel.setColumnVisible(0, false);
+		var linkStyle = new qx.ui.table.cellrenderer.Default();
+		linkStyle.setDefaultCellStyle("text-decoration:underline;color:blue");
+		columnModel.setDataCellRenderer(3, linkStyle);
+		columnModel.setDataCellRenderer(6, linkStyle);
+		this.refresh();
+	},
+	members:   {
+		curRow:       0,
+		curId:        0,
+		onCellClick:  function(event) {
+			this.curRow = event.getRow();
+			this.curId = this.getTableModel().getValue(0, this.curRow);
+			var cityID;
+			switch(event.getColumn()) {
+				case 3:
+				{
+					cityID = this.getTableModel().getValue(0, event.getRow());
+					var spl = this.getTableModel().getValue(6, event.getRow()).split(":");
+					var x = Number(spl[0]);
+					var y = Number(spl[1]);
+					webfrontend.data.City.getInstance().setRequestId(cityID);
+					webfrontend.gui.Util.showMapModeViewPos('r', 0, x, y);
+				}
+					break;
+				case 6:
+				{
+					cityID = this.getTableModel().getValue(0, event.getRow());
+					var spl = this.getTableModel().getValue(6, event.getRow()).split(":");
+					var x = Number(spl[0]);
+					var y = Number(spl[1]);
+					webfrontend.gui.Util.showMapModeViewPos('r', 0, x, y);
+				}
+					break;
+			}
+		},
+		updateCityTS: function(cid, count) {
+			var tm = this.getTableModel();
+			for(var i = 0; i < tm.getRowCount(); i++) {
+				if(tm.getValue(0, i) == cid) {
+					tm.setValue(1, i, count);
+					break;
+				}
+			}
+		},
+
+		refresh:           function() {
+
+			var tm = this.getTableModel();
+			tm.removeRows(0, tm.getRowCount());
+			tm.addRows([
+				[0, "Loading..."]
+			]);
+			var rw = ava.IdleRaidUnitsTable.getInstance();
+			removeConsumer("COMO", rw.DispatchResultsRw, rw);
+			addConsumer("COMO", rw.DispatchResultsRw, rw, "a");
+			//  addConsumer("DEFO", this.dispatchResults, this, "a");
+		},
+		getRequestDetails: function(details) {
+			return "a";
+		},
+		DispatchResultsRw: function(results) {
+			//	console.debug("dispatchResultsRw");
+			//	console.dir(results);
+
+
+			if(results == null)
+				return;
+			var rt = ava.IdleRaidUnitsTable.getInstance();
+			var rw = ava.RaidingWindow.getInstance();
+
+			var resMain = webfrontend.res.Main.getInstance();
+			var sI = webfrontend.data.Server.getInstance();
+			var pC = webfrontend.data.Player.getInstance().cities;
+			var tm = rt.getTableModel();
+			var CI = webfrontend.data.City.getInstance();
+			var curCityId = CI.getId();
+
+			if(rw.rnf) {
+				rw.rnf.length = 0;
+			}
+			if(rw.rnmts) {
+				rw.rnmts.length = 0;
+			}
+			var bossT = rw.bossRaider.t;
+			var bossTcount = 0;
+			var idleCities = [];
+			var cityList = rw.cityGroups.getSelection();
+			if(cityList.length > 0) {
+				cityList = cityList[0].cids;
+			}
+
+			//tm.removeRows( 0, tm.getRowCount() );
+			var excludeIfTxt = rw.excludeIf.getValue();
+			var excludeShips = rw.excludeShips.getValue();
+			var excludeRefs = "";
+			var hasExcludes = false;
+			var excludeTs = Number(rw.excludeTs.getValue());
+			var sortIx = tm.getSortColumnIndex();
+			var dir = tm.isSortAscending();
+			if(excludeIfTxt.length > 0) {
+				excludeRefs = excludeIfTxt.split(',');
+				for(var ii = 0; ii < excludeRefs.length; ++ii) {
+					if(excludeRefs[ii].length > 0) {
+						hasExcludes = true;
+						break;
+					}
+				}
+			}
+			for(var i = 0; i < results.length; i++) {
+				var result = results[i];
+				if(result.hasOwnProperty("c") && (cityList.length == 0 || cityList.indexOf(result.i) >= 0)) {
+					var x = result.i & 0xffff;
+					var y = result.i >> 16;
+					var first = true;
+					var unitStr = "";
+					var ts = 0;
+					var totalTS = 0;
+					for(var j = 0; j < result.c.length; j++) {
+						var command = result.c[j];
+						if(command.i == 0) {
+							for(var k = 0; k < command.u.length; k++) {
+								var unitInfo = resMain.units[command.u[k].t];
+								var count = command.u[k].c;
+								if(count > 0 && unitInfo.c > 0 && (!excludeShips || unitInfo.ls)) {
+									if(!first) {
+										unitStr += ",";
+									}
+									unitStr += unitShortName(command.u[k].t);
+									ts += count * unitInfo.uc;
+									totalTS += count * unitInfo.uc;
+									first = false;
+									if(result.i == curCityId) {
+										bossTcount += count;
+									}
+								}
+							}
+						} else if(parseInt(command.i, 10) < 0) {
+							for(var k = 0; k < command.u.length; k++) {
+								var unitInfo = resMain.units[command.u[k].t];
+								var count = command.u[k].c;
+								if(count > 0 && unitInfo.c > 0 && (!excludeShips || unitInfo.ls)) {
+									ts -= count * unitInfo.uc;
+									if(result.i == curCityId) {
+										bossTcount -= count;
+									}
+								}
+							}
+						} else {
+							for(var k = 0; k < command.u.length; k++) {
+								var unitInfo = resMain.units[command.u[k].t];
+								var count = command.u[k].c;
+								if(count > 0 && unitInfo.c > 0 && (!excludeShips || unitInfo.ls)) {
+									totalTS += count * unitInfo.uc;
+								}
+							}
+						}
+					}
+					if(!first) {
+						//var columnNames = ["CityID", "TS", "Type", "City", "Ref", "Cont", "Coords", "% TS"];
+						var cont = sI.getContinentFromCoords(x, y);
+						var ref = "";
+						if(pC.hasOwnProperty(result.i))
+							ref = pC[result.i].reference;
+						var exclude = (excludeTs > 0 && ts < excludeTs);
+						if(hasExcludes) {
+							for(var ii = 0; !exclude && ii < excludeRefs.length; ++ii) {
+								exclude = ref.indexOf(excludeRefs[ii]) >= 0;
+							}
+						}
+						if(!exclude) {
+							var pct = Math.floor(Math.min(100, (ts / totalTS) * 100) * 100) / 100;
+							if(pct == 100 && rw.rnf) {
+								rw.rnf.push([result.i, ts, unitStr, result.n, ref, cont, x.toString() + ":" + y.toString(), pct]);
+							}
+							if(ts >= 30000 && rw.rnmts) {
+								rw.rnmts.push([result.i, ts, unitStr, result.n, ref, cont, x.toString() + ":" + y.toString(), pct]);
+							}
+							idleCities.push([result.i, ts, unitStr, result.n, ref, cont, x.toString() + ":" + y.toString(), pct]);
+						}
+					}
+				}
+				if(result.i == curCityId) {
+					rw.bossUnitLabel.setValue(rw.formatNumber(bossTcount));
+				}
+			}
+			tm.setData(idleCities);
+			tm.sortByColumn((sortIx >= 0) ? sortIx : "1", (sortIx >= 0) ? dir : false);
+			if(!rw.autoUpdate.getValue()) {
+				removeConsumer("COMO", rw.DispatchResultsRw, rw);
+			}
+			rw.nextIdleCityButton.setEnabled(true);
+		} // DispatchResults
+
+	}
+});
+qx.Class.define("ava.RaidingWindow", {
 	type:      "singleton",
 	extend:    qx.ui.window.Window,
 	construct: function() {
@@ -3122,10 +3368,10 @@ qx.Class.define("ava.ui.RaidingWindow", {
 			//this.tabview.setHeight(h-40);
 		},
 		onOpen:              function() {
-			ava.ui.IdleRaidUnitsTable.getInstance().refresh();
+			ava.IdleRaidUnitsTable.getInstance().refresh();
 		},
 		onClose:             function() {
-			var rw = ava.ui.IdleRaidUnitsTable.getInstance();
+			var rw = ava.IdleRaidUnitsTable.getInstance();
 			removeConsumer("COMO", rw.DispatchResultsRw, rw);
 
 		},
@@ -3635,6 +3881,8 @@ qx.Class.define("ava.ui.RaidingWindow", {
 				this.targetTable.refresh();
 			});
 			container.add(btn);
+			RaidingWindowLoad(this);
+
 			var value = localStorage.getItem("mt__autoUpdateCB");
 			this.autoUpdate = new qx.ui.form.CheckBox("Rfrsh").set({
 				marginLeft: 2
@@ -3714,12 +3962,12 @@ qx.Class.define("ava.ui.RaidingWindow", {
 				localStorage.setItem("mt__excludeIdleRefs", val);
 			}, this);
 			idleUnitsPage.add(container);
-			idleUnitsPage.add(ava.ui.IdleRaidUnitsTable.getInstance(), {
+			idleUnitsPage.add(ava.IdleRaidUnitsTable.getInstance(), {
 				flex: 1
 			});
 
-			//ava.ui.IdleRaidUnitsTable.getInstance().setHeight(300);
-			btn.targetTable = ava.ui.IdleRaidUnitsTable.getInstance();
+			//ava.IdleRaidUnitsTable.getInstance().setHeight(300);
+			btn.targetTable = ava.IdleRaidUnitsTable.getInstance();
 			btn.autoUpdate = this.autoUpdate;
 			return idleUnitsPage;
 		},
@@ -4570,7 +4818,7 @@ qx.Class.define("ava.ui.RaidingWindow", {
 				enabled:       false,
 				toolTipText:   "Next idle city"
 			});
-			this.nextIdleCityButton.addListener("click", this.nextIdleRaidCity);
+			this.nextIdleCityButton.addListener("click", this.nextIdleRaidCity,this);
 			subContainer.add(this.nextIdleCityButton);
 
 			btn = new qx.ui.form.Button("GO").set({
@@ -4590,7 +4838,7 @@ qx.Class.define("ava.ui.RaidingWindow", {
 
 			// detect when user is idle
 			window.addEventListener('mousemove', function() {
-				ava.ui.RaidingWindow.getInstance().lastMouseMoveTime = webfrontend.Util.getCurrentTime().getTime();
+				ava.RaidingWindow.getInstance().lastMouseMoveTime = webfrontend.Util.getCurrentTime().getTime();
 			}, false);
 
 			subContainer = new qx.ui.container.Composite();
@@ -4706,7 +4954,7 @@ qx.Class.define("ava.ui.RaidingWindow", {
 				paddingBottom: 0
 			});
 			btn.rw = this;
-			btn.addListener("click", ava.ui.RaidingWindow.findAllDungeons);
+			btn.addListener("click", this.findAllDungeons,this);
 			subContainer.add(btn);
 			this.commandContainer.add(subContainer);
 			container.add(this.commandContainer);
@@ -5031,7 +5279,7 @@ qx.Class.define("ava.ui.RaidingWindow", {
 		getDungeonArray:        function(filterBadTypes) {
 			var bS = webfrontend.res.Main.getInstance();
 			paDebug("Get Dungeon Array");
-			var rw = ava.ui.RaidingWindow.getInstance();
+			var rw = ava.RaidingWindow.getInstance();
 			rw.getObfuscatedNames();
 			var dArray = new Array();
 			var CI = webfrontend.data.City.getInstance();
@@ -5044,7 +5292,7 @@ qx.Class.define("ava.ui.RaidingWindow", {
 			var forestOnly = filterBadTypes && rw.hasForestOnly(false);
 			var seaOnly = rw.hasSeaOnly();
 			var maxDist = seaOnly ? 70 : (rw.hasCav() ? 30 : 15);
-			console.log("mtnonly " + mtnOnly + " foestOnly " + forestOnly + "SeaOnly " + seaOnly);
+			//console.log("mtnonly " + mtnOnly + " foestOnly " + forestOnly + "SeaOnly " + seaOnly);
 			var st = webfrontend.data.ServerTime.getInstance().getServerStep() - (21 * 3600);
 			for(var cluster in rw.worldData.d) {
 				var objectData = rw.safeGetProperty(rw.worldData.d[cluster][rw.objData], "d");
@@ -5104,17 +5352,17 @@ qx.Class.define("ava.ui.RaidingWindow", {
 					return Number(a[4]) - Number(b[4]);
 				});
 			}
-			console.log(dArray);
+			//console.log(dArray);
 			return dArray;
 		},
 		findDungeonsI:          function(filterBadTypes) {
-			var rw = ava.ui.RaidingWindow.getInstance();
+			var rw = ava.RaidingWindow.getInstance();
 			rw.targetContainer.removeAll();
 			rw.updateAvailableUnits();
 			// first pass, enumerate and sort
-			console.log(rw);
+			//console.log(rw);
 			var dArray = rw.getDungeonArray(filterBadTypes);
-			console.log(dArray);
+			//console.log(dArray);
 			for(var ii = 0; ii < 16 && ii < dArray.length; ++ii) {
 				var found = false;
 				var cstr = leftPad(dArray[ii][5], 3, "0") + ":" + leftPad(dArray[ii][6], 3, "0");
@@ -5135,10 +5383,12 @@ qx.Class.define("ava.ui.RaidingWindow", {
 			this.findDungeonsI(true);
 		},
 		findAllDungeons:        function() {
+			RaidingWindowSave(this);
+
 			this.findDungeonsI(false);
 		},
 		nextIdleRaidCityI:      function(moveView) {
-			var table = ava.ui.IdleRaidUnitsTable.getInstance();
+			var table = ava.IdleRaidUnitsTable.getInstance();
 
 			var tm = table.getTableModel();
 
@@ -5158,10 +5408,10 @@ qx.Class.define("ava.ui.RaidingWindow", {
 				webfrontend.gui.Util.showMapModeViewPos('r', 0, x, y);
 		},
 		nextIdleRaidCity:       function() {
-			this.nextIdleRaidCityI(true);
+			ava.RaidingWindow.getInstance().nextIdleRaidCityI(true);
 		},
 		nextIdleRaidCityNoMove: function() {
-			this.nextIdleRaidCityI(false);
+			ava.RaidingWindow.getInstance().nextIdleRaidCityI(false);
 		},
 		setTotalsReadOnly:      function(readOnly) {
 			var targets = this.targetContainer.getChildren();
@@ -5766,7 +6016,7 @@ qx.Class.define("ava.ui.RaidingWindow", {
 		sendRaids:              function() {
 			// clearRaidErrorWindow();
 			console.log("Sending raids");
-			var rw = ava.ui.RaidingWindow.getInstance();
+			var rw = ava.RaidingWindow.getInstance();
 			var CI = webfrontend.data.City.getInstance();
 			var sendTime = 0;
 			var sendContainer = rw.commandContainer.getChildren()[0];
@@ -5845,12 +6095,12 @@ qx.Class.define("ava.ui.RaidingWindow", {
 			}
 		},
 		clearRaidErrorWindow:   function() {
-			if(ava.ui.RaidingWindow.getInstance().raidErrorWin) {
-				ava.ui.RaidingWindow.getInstance().raidErrorWin.lbl.setValue("");
+			if(ava.RaidingWindow.getInstance().raidErrorWin) {
+				ava.RaidingWindow.getInstance().raidErrorWin.lbl.setValue("");
 			}
 		},
 		showRaidErrorWindow:    function() {
-			if(ava.ui.RaidingWindow.getInstance().raidErrorWin == null || ava.ui.RaidingWindow.getInstance().raidErrorWin.lbl == null) {
+			if(ava.RaidingWindow.getInstance().raidErrorWin == null || ava.RaidingWindow.getInstance().raidErrorWin.lbl == null) {
 				var win = new qx.ui.window.Window("Raid Status");
 				win.setLayout(new qx.ui.layout.Grow());
 				win.set({
@@ -5871,19 +6121,19 @@ qx.Class.define("ava.ui.RaidingWindow", {
 				win.add(container);
 
 				win.addListener("close", function() {
-					ava.ui.RaidingWindow.getInstance().raidErrorWin = null;
+					ava.RaidingWindow.getInstance().raidErrorWin = null;
 				}, this);
 
 				//this.a.desktop.add( win );
 				win.center();
 				win.open();
-				ava.ui.RaidingWindow.getInstance().raidErrorWin = win;
+				ava.RaidingWindow.getInstance().raidErrorWin = win;
 			}
 		},
 		addRaidError:           function(msg) {
-			ava.ui.RaidingWindow.getInstance().showRaidErrorWindow();
-			if(ava.ui.RaidingWindow.getInstance().raidErrorWin)
-				ava.ui.RaidingWindow.getInstance().raidErrorWin.lbl.setValue(msg + "<br><br>" + ava.ui.RaidingWindow.getInstance().raidErrorWin.lbl.getValue());
+			ava.RaidingWindow.getInstance().showRaidErrorWindow();
+			if(ava.RaidingWindow.getInstance().raidErrorWin)
+				ava.RaidingWindow.getInstance().raidErrorWin.lbl.setValue(msg + "<br><br>" + ava.RaidingWindow.getInstance().raidErrorWin.lbl.getValue());
 		},
 		onRaidSent:             function(comm, result, v) {
 			if(!comm || result == null) {
@@ -6039,7 +6289,7 @@ qx.Class.define("ava.ui.RaidingWindow", {
 		updateAvailableUnits:   function() {
 			console.log("here1");
 			;
-			var rw = ava.ui.RaidingWindow.getInstance();
+			var rw = ava.RaidingWindow.getInstance();
 			console.log("here2");
 			;
 			var departNow = (rw.commandContainer.getChildren()[0].getChildren()[0].getSelection()[0].getLabel() == "Now");

@@ -25,7 +25,7 @@
     <CLASSES>
       <root url="file://$PROJECT_DIR$/avaRaid.js" />
       <root url="file://$PROJECT_DIR$/avaUtil.d.ts" />
-      <root url="file://$PROJECT_DIR$/todo/avaIncomming.d.ts" />
+      <root url="file://$PROJECT_DIR$/avaIncomming.d.ts" />
       <root url="file://$PROJECT_DIR$/avaInit.js" />
       <root url="file://$PROJECT_DIR$/avaInitPre.js" />
       <root url="file://$PROJECT_DIR$/avaMisc.js" />
@@ -34,7 +34,7 @@
       <root url="file://$PROJECT_DIR$/avaInit.d.ts" />
       <root url="file://$PROJECT_DIR$/avaDec.d.ts" />
       <root url="file://$PROJECT_DIR$/avaTODO.js" />
-      <root url="file://$PROJECT_DIR$/todo/avaIncomming.js" />
+      <root url="file://$PROJECT_DIR$/avaIncomming.js" />
       <root url="file://$PROJECT_DIR$/avaIntel.js" />
       <root url="file://$PROJECT_DIR$/avaTODO.d.ts" />
       <root url="file://$PROJECT_DIR$/avaContextMenu.js" />
