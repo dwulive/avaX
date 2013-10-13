@@ -2,7 +2,9 @@
  * Created by David on 10/8/13.
  */
 ///<reference path="avaDec.ts" />
-var qx : any;
+declare var qx : any;
+declare var webfrontend : any;
+
 function AvaInit() {
 	try {
 		var bossKill = [50, 300, 2000, 4000, 10000, 15000, 20000, 30000, 45000, 60000];
@@ -115,7 +117,7 @@ function AvaInit() {
 							var research17 = webfrontend.data.Tech.getInstance().getBonus("unitDamage", webfrontend.data.Tech.research, 17);
 							var shrine17 = webfrontend.data.Tech.getInstance().getBonus("unitDamage", webfrontend.data.Tech.shrine, 17);
 							var bonus17 = ((shrine17 + research17) / 100) + 1;
-							var zergs6 = webfrontend.gui.Util.formatNumbers(parseInt(bossKill[parseInt(level) - 1] / bonus6));
+							var zergs6 = webfrontend.gui.Util.formatNumbers((bossKill[(level) - 1] / bonus6));
 							if(weak == "Infantry")
 								zergs6 = webfrontend.gui.Util.formatNumbers(((bossKill[(level) - 1] / bonus6) * 0.67));
 							var zergs7 = webfrontend.gui.Util.formatNumbers((bossKill[(level) - 1] / bonus7) * 0.72);
@@ -161,15 +163,15 @@ function AvaInit() {
 					}
 				}
 			} catch(e) {
-				console.assert(0);
-				console.assert(0);
+				console.assert(false);
+				console.assert(false);
 			}
 		}
 
 		a.worldViewToolTip.addListener("appear", toolTipAppear, this);
 	} catch(e) {
-		console.assert(0);
-		console.assert(0);
+		console.assert(false);
+		console.assert(false);
 	}
 }
 
@@ -204,8 +206,8 @@ qx.Class.define("ava.ui.RaidReporter", {
 			rep.origOnReport(r, fm, fn);
 			if(fm == null)
 				return;
-			children = rep.reportBody.getChildren();
-			for(i = 0; i < children.length; i++) {
+			var children = rep.reportBody.getChildren();
+			for(var i = 0; i < children.length; i++) {
 				if(children[i] instanceof qx.ui.core.Spacer) {
 					var fA = fm.h.t.substr(0, 5);
 					var fv = fA.charAt(1);
@@ -239,7 +241,7 @@ qx.Class.define("ava.ui.RaidReporter", {
 								if(fm.r[rindex].t >= 0) {
 									resGain[fm.r[rindex].t] = fm.r[rindex].v;
 								} else {
-									var iType = Math.Math.abs(fm.r[rindex].t);
+									var iType = Math.abs(fm.r[rindex].t);
 									itemCount = fm.r[rindex].v;
 									var imgIx = bS.items[iType].i;
 									itemImg = new qx.ui.basic.Image("webfrontend/" + bS.imageFiles[imgIx]);
@@ -360,7 +362,7 @@ qx.Class.define("ava.ui.RaidReporter", {
 									col = yellowColor;
 								else if(percent > 100)
 									showText = false;
-								str = "<b style=\"color:" + col + "\">" + parseInt(percent) + "%  Underkill:</b>  Gained " + percent.toFixed(2) + "% of " + webfrontend.gui.Util.formatNumbers(maxLoot).toString();
+								str = "<b style=\"color:" + col + "\">" + percent+ "%  Underkill:</b>  Gained " + percent.toFixed(2) + "% of " + webfrontend.gui.Util.formatNumbers(maxLoot).toString();
 							} else {
 								var percent = maxLoot / fm.rcc * 100.0;
 								var col = "green";
@@ -370,7 +372,7 @@ qx.Class.define("ava.ui.RaidReporter", {
 									col = yellowColor;
 								else if(percent > 100)
 									showText = false;
-								str = "<b style=\"color:" + col + "\">" + parseInt(percent) + "%  Overkill:</b>  Only " + percent.toFixed(2) + "% of troops needed for max loot (" + webfrontend.gui.Util.formatNumbers(maxLoot).toString() + ")";
+								str = "<b style=\"color:" + col + "\">" + (percent) + "%  Overkill:</b>  Only " + percent.toFixed(2) + "% of troops needed for max loot (" + webfrontend.gui.Util.formatNumbers(maxLoot).toString() + ")";
 							}
 							if(showText) {
 								var txt = new qx.ui.basic.Label();
@@ -403,7 +405,7 @@ qx.Class.define("ava.ui.RaidReporter", {
 									if(maxLoot < info.mn)
 										info.mn = maxLoot;
 								} else {
-									var info = {};
+									var info : any;
 									info.n = 1;
 									info.l = maxLoot;
 									info.mx = maxLoot;

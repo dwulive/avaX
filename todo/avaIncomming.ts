@@ -1,4 +1,4 @@
-///<reference path="avaDec.ts" />
+///<reference path="../avaDec.ts" />
 declare var qx : any;
 
 //
@@ -101,40 +101,7 @@ function setNextFortuneTime() {
 	nfTime = h + ':' + m + ':' + s;
 }
 
-function showMsgWindow(title, msgText) {
-	var win = new qx.ui.window.Window(title);
-	win.setLayout(new qx.ui.layout.VBox(2));
-	win.set({
-		showMaximize:  false,
-		showMinimize:  false,
-		allowMaximize: false,
-		width:         400,
-		height:        80
-	});
-	win.lbl = new qx.ui.basic.Label(msgText).set({
-		rich: true
-	});
-	win.add(win.lbl);
-	var row = new qx.ui.container.Composite(new qx.ui.layout.HBox(2));
-	win.add(row);
-	var btn2 = new qx.ui.form.Button("Close").set({
-		appearance:    "button-text-small",
-		width:         80,
-		paddingLeft:   5,
-		paddingRight:  5,
-		paddingTop:    0,
-		paddingBottom: 0
-	});
-	btn2.win = win;
-	row.add(btn2);
-	btn2.addListener("click", function() {
-		this.win.hide();
-	});
-	win.addListener("close", function() {
-	}, this);
-	win.center();
-	win.open();
-}
+
 
 function showFortuneWindow(msgText) {
 	var win = new qx.ui.window.Window("Fortune Teller");

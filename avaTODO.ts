@@ -2,7 +2,7 @@
  * Created by David on 10/8/13.
  */
 ///<reference path="avaDec.ts" />
-var qx : any;
+declare var qx : any;
 
 qx.Class.define("ava.Version", {
 	type:    "static",

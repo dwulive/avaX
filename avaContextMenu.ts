@@ -6,7 +6,7 @@ declare var qx : any;
 /**
  * Created by David on 10/8/13.
  */
-function AvaContextMenuInit() {
+(function () {
 
 	try {
 		var bossKill = [50, 300, 2000, 4000, 10000, 15000, 20000, 30000, 45000, 60000];
@@ -201,4 +201,4 @@ function AvaContextMenuInit() {
 	} catch(e) {
 		paDebug(e);
 	}
-}; // avainit
+})(); // avainit

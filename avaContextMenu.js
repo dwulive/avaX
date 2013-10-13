@@ -3,7 +3,7 @@
 /**
 * Created by David on 10/8/13.
 */
-function AvaContextMenuInit() {
+(function () {
     try  {
         var bossKill = [50, 300, 2000, 4000, 10000, 15000, 20000, 30000, 45000, 60000];
         var dungeonKill = [10, 100, 450, 1500, 3500, 6000, 13000, 20000, 35000, 60000];
@@ -195,5 +195,4 @@ else
     } catch (e) {
         paDebug(e);
     }
-}
-;
+})();
