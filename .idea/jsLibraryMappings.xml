@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="JavaScriptLibraryMappings">
-    <file url="PROJECT" libraries="{Generated files, qxEA}" />
+    <file url="file://$PROJECT_DIR$/avaRaid.js" libraries="{qxEa}" />
+    <file url="https://www.lordofultima.com/home" libraries="{bootstrap}" />
+    <file url="PROJECT" libraries="{qxEa}" />
     <excludedPredefinedLibrary name="HTML" />
     <excludedPredefinedLibrary name="HTML5 / EcmaScript 5" />
   </component>

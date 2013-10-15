@@ -5,44 +5,31 @@
       <option name="frameworkVersion" value="2.01" />
       <sourceFilesUrls>
         <item url="file://$PROJECT_DIR$/avaRaid.js" />
-        <item url="file://$PROJECT_DIR$/avaUtil.d.ts" />
-        <item url="file://$PROJECT_DIR$/avaIncomming.d.ts" />
         <item url="file://$PROJECT_DIR$/avaInit.js" />
-        <item url="file://$PROJECT_DIR$/avaInitPre.js" />
-        <item url="file://$PROJECT_DIR$/avaMisc.js" />
-        <item url="file://$PROJECT_DIR$/avaChat.js" />
-        <item url="file://$PROJECT_DIR$/avaMisc.d.ts" />
-        <item url="file://$PROJECT_DIR$/avaInit.d.ts" />
-        <item url="file://$PROJECT_DIR$/avaDec.d.ts" />
-        <item url="file://$PROJECT_DIR$/avaTODO.js" />
-        <item url="file://$PROJECT_DIR$/avaIncomming.js" />
-        <item url="file://$PROJECT_DIR$/avaIntel.js" />
-        <item url="file://$PROJECT_DIR$/avaTODO.d.ts" />
-        <item url="file://$PROJECT_DIR$/avaContextMenu.js" />
         <item url="file://$PROJECT_DIR$/avaUtil.js" />
+        <item url="file://$PROJECT_DIR$/avaIntel.js" />
+        <item url="file://$PROJECT_DIR$/avaChat.js" />
+        <item url="file://$PROJECT_DIR$/avaTODO.js" />
+        <item url="file://$PROJECT_DIR$/avaContextMenu.js" />
+        <item url="file://$PROJECT_DIR$/avaIncomming.js" />
+        <item url="file://$PROJECT_DIR$/avaMisc.js" />
       </sourceFilesUrls>
     </properties>
     <CLASSES>
       <root url="file://$PROJECT_DIR$/avaRaid.js" />
-      <root url="file://$PROJECT_DIR$/avaUtil.d.ts" />
-      <root url="file://$PROJECT_DIR$/avaIncomming.d.ts" />
       <root url="file://$PROJECT_DIR$/avaInit.js" />
-      <root url="file://$PROJECT_DIR$/avaInitPre.js" />
-      <root url="file://$PROJECT_DIR$/avaMisc.js" />
-      <root url="file://$PROJECT_DIR$/avaChat.js" />
-      <root url="file://$PROJECT_DIR$/avaMisc.d.ts" />
-      <root url="file://$PROJECT_DIR$/avaInit.d.ts" />
-      <root url="file://$PROJECT_DIR$/avaDec.d.ts" />
-      <root url="file://$PROJECT_DIR$/avaTODO.js" />
-      <root url="file://$PROJECT_DIR$/avaIncomming.js" />
-      <root url="file://$PROJECT_DIR$/avaIntel.js" />
-      <root url="file://$PROJECT_DIR$/avaTODO.d.ts" />
-      <root url="file://$PROJECT_DIR$/avaContextMenu.js" />
       <root url="file://$PROJECT_DIR$/avaUtil.js" />
+      <root url="file://$PROJECT_DIR$/avaIntel.js" />
+      <root url="file://$PROJECT_DIR$/avaChat.js" />
+      <root url="file://$PROJECT_DIR$/avaTODO.js" />
+      <root url="file://$PROJECT_DIR$/avaContextMenu.js" />
+      <root url="file://$PROJECT_DIR$/avaIncomming.js" />
+      <root url="file://$PROJECT_DIR$/avaMisc.js" />
     </CLASSES>
     <DOCUMENTATION>
       <root url="http://demo.qooxdoo.org/current/apiviewer" />
     </DOCUMENTATION>
+    <JAVADOC />
     <SOURCES />
   </library>
 </component>

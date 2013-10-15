@@ -8,7 +8,6 @@ declare function paDebug ( str  );
 declare function paError( str  ) ;
 declare function getBossWeakness(name);
 declare function getDungeonWeakness(name);
-declare function dung(type, lvl, progress, coords, distance);
 declare function formatDate(tme);
 declare function convertIdToCoordinatesObject(id);
 declare function showMsgWindow(title, msgText);
@@ -30,6 +29,7 @@ declare function checkForSubAttacks(results, thisObj): void;
 
 
 declare var webfrontend : any;
+declare var qx :any;
 declare var  ava : any;
 declare var player;
 declare var serverTime;

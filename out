@@ -1,0 +1,8 @@
+Requesting compile from http://closure-compiler.appspot.com/compile...
+
+An Error Occurred Running GoogleCC:
+Invalid URI: The Uri string is too long.
+   at System.Uri.EscapeString(String input, Int32 start, Int32 end, Char[] dest, Int32& destPos, Boolean isUriString, Char force1, Char force2, Char rsvd)
+   at System.Uri.EscapeDataString(String stringToEscape)
+   at JsGoogleCompile.Compiler.CompileJsFile(String fileName)
+   at JsGoogleCompile.RequestCompile.Main(String[] args)

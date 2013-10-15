@@ -2,8 +2,9 @@
  * Created by David on 10/8/13.
  */
 ///<reference path="avaDec.ts" />
-declare var qx : any;
-declare var webfrontend : any;
+//declare var qx:any;
+//declare var webfrontend:any;
+//import qx = require("qx\qxEa");
 
 function leftPad(num, minsize, padstring) {
 	var str = num.toString();
@@ -11,33 +12,123 @@ function leftPad(num, minsize, padstring) {
 		str = padstring + str;
 	return str;
 }
-function RaidingWindowEnumProperties(rw,func)
+
+//declare function CreateTree(rw, win);
+
+
+class dung2
 {
-	for(var i in rw )
+	constructor(public _type : number,
+	public level:number,
+	public progress : number ,
+	public coords:string,
+	public distance: number)
 	{
-	 if( rw.propertyIsEnumerable(i)
-	 && (typeof rw[i] == "number"||typeof rw[i]=="string")
-	 && i[0] != '$' && i[0] != '_' )
-	 {
-	    func(rw, i);;
-	 }
 	}
-};
-function GetStoreName( rw , i : string ) : string
+	public get_Type = function() {
+		return this._type;
+	};
+	public get_Level = function() {
+		return this.level;
+	};
+	public get_Progress = function() {
+		return this.progress;
+	};
+	public get_Coordinates = function() {
+		return this.coords;
+	};
+	public get_Distance = function() {
+		return this.distance;
+	};
+}
+
+
+
+
+
+class dung
 {
-  var rv =  "_s_" + rw.className() + "_" + i.toString();
-  	console.log(rv);
+	type : number;
+	level : number;
+	progress : number;
+	coords : string;
+	id : number;
+	 distance : number;
+	constructor(type, lvl, progress, coords, distance)
+	 {
+	this.type = type;
+	this.level = lvl;
+	this.progress = progress;
+	this.coords = coords;
+	this.id = coords;
+	this.distance = distance;
+	}
+
+	public get_Level = function() {
+		return this.level;
+	};
+	public get_Progress = function() {
+		return this.progress;
+	};
+	public get_Coordinates = function() {
+		return this.coords;
+	};
+	public get_Distance = function() {
+		return this.distance;
+	};
+	public get_Id = function() {
+		return this.id;
+	};
+}
+
+
+function RaidingWindowEnumProperties(rw, func) {
+	for(var i in rw) {
+		if(rw.hasOwnProperty(i)) {
+
+			console.log(i + " " + typeof rw[i]);
+			if((typeof rw[i] != "function" && typeof rw[i] != "object" ) // how about arrays?
+				&& i[0] != '$' && i[0] != '_') {
+				func(rw, i);
+			}
+		}
+	}
+}
+
+
+function GetStoreName(rw, i:string):string {
+	var rv = "__s." + rw.classname + "." + i.toString();
+	console.log(rv);
 	return rv;
 }
 
-function RaidingWindowSave(rw)
-{
-	RaidingWindowEnumProperties( rw, function(rw,i) { localStorage.setItem(GetStoreName(rw,i), rw[i]);  } );
+function RaidingWindowSave(rw) {
+	console.log("Saveing");
+	RaidingWindowEnumProperties(rw, function(rw, i) {
+		localStorage.setItem(GetStoreName(rw, i), rw[i]);
+	});
 }
-function RaidingWindowLoad(rw)
-{
-	RaidingWindowEnumProperties( rw, function(rw,i) { var temp = localStorage.getItem(GetStoreName(rw,i) );  if(temp!=null) rw[i]=temp;  } );
+function RaidingWindowLoad(rw) {
+	console.log("Loading");
+	RaidingWindowEnumProperties(rw, function(rw, i) {
+		var temp = localStorage.getItem(GetStoreName(rw, i));
+		if(temp != null) rw[i] = temp;
+	});
 }
+
+function CreateCheckBox(_this, member, subContainer, tooltip) {
+	var check = new qx.ui.form.CheckBox(member).set({
+		marginLeft: 5
+	});
+	check.setToolTipText(tooltip);
+	check.initValue(_this[member]);
+	subContainer.add(check);
+	check.addListener("changeValue", function(e) {
+		_this[member] = e.getData();
+	});
+	return check;
+}
+
 
 function avaInitRaids() {
 	try {
@@ -131,6 +222,7 @@ function avaInitRaids() {
 							var zergs = webfrontend.gui.Util.formatNumbers(bossKill[parseInt(level) - 1]);
 							var sb = new qx.util.StringBuilder(20);
 							var research6 = webfrontend.data.Tech.getInstance().getBonus("unitDamage", webfrontend.data.Tech.research, 6);
+							var shrine6 = webfrontend.data.Tech.getInstance().getBonus("unitDamage", webfrontend.data.Tech.shrine, 6);
 							var shrine6 = webfrontend.data.Tech.getInstance().getBonus("unitDamage", webfrontend.data.Tech.shrine, 6);
 							var bonus6 = ((shrine6 + research6) / 100) + 1;
 							var research7 = webfrontend.data.Tech.getInstance().getBonus("unitDamage", webfrontend.data.Tech.research, 6);
@@ -395,7 +487,7 @@ qx.Class.define("ava.RaidReporter", {
 									col = yellowColor;
 								else if(percent > 100)
 									showText = false;
-								str = "<b style=\"color:" + col + "\">" + percent+ "%  Underkill:</b>  Gained " + percent.toFixed(2) + "% of " + webfrontend.gui.Util.formatNumbers(maxLoot).toString();
+								str = "<b style=\"color:" + col + "\">" + percent + "%  Underkill:</b>  Gained " + percent.toFixed(2) + "% of " + webfrontend.gui.Util.formatNumbers(maxLoot).toString();
 							} else {
 								var percent = maxLoot / fm.rcc * 100.0;
 								var col = "green";
@@ -438,7 +530,7 @@ qx.Class.define("ava.RaidReporter", {
 									if(maxLoot < info.mn)
 										info.mn = maxLoot;
 								} else {
-									var info : any;
+									var info:any;
 									info.n = 1;
 									info.l = maxLoot;
 									info.mx = maxLoot;
@@ -996,6 +1088,51 @@ qx.Class.define("ava.FillWithResourcesWindow", {
 
 var distWantModifier = 0.675;
 
+function unitShortName(unitType) {
+	switch(unitType) {
+		case 3:
+			return "Rng";
+		case 4:
+			return "Grd";
+		case 5:
+			return "Tmp";
+		case 6:
+			return "Zrk";
+		case 7:
+			return "Mge";
+		case 9:
+			return "Xbw";
+		case 10:
+			return "Pal";
+		case 11:
+			return "Knt";
+		case 12:
+			return "Lck";
+		case 15:
+			return "Frg";
+		case 16:
+			return "Slp";
+		case 17:
+			return "WG";
+	}
+	return webfrontend.res.Main.getInstance().units[unitType].dn;
+}
+
+function dungShortName(dungType) {
+	switch(dungType) {
+		case 2:
+			return "Sea";
+		case 3:
+			return "Hil";
+		case 4:
+			return "Mtn";
+		case 5:
+			return "For";
+	}
+	return "Unk";
+}
+
+
 qx.Class.define("ava.IdleRaidUnitsTable", {
 	extend:    qx.ui.table.Table,
 	implement: [webfrontend.net.IUpdateConsumer],
@@ -1005,6 +1142,7 @@ qx.Class.define("ava.IdleRaidUnitsTable", {
 		var tableModel = new qx.ui.table.model.Simple();
 		var columnNames = ["CityID", "TS", "Type", "City", "Ref", "Cont", "Coords", "%TS"];
 		tableModel.setColumns(columnNames);
+
 		var custom = {
 			tableColumnModel: function(obj) {
 				return new qx.ui.table.columnmodel.Resize(obj);
@@ -1066,7 +1204,7 @@ qx.Class.define("ava.IdleRaidUnitsTable", {
 			tm.addRows([
 				[0, "Loading..."]
 			]);
-			var rw = ava.IdleRaidUnitsTable.getInstance();
+			var rw = this;
 			removeConsumer("COMO", rw.DispatchResultsRw, rw);
 			addConsumer("COMO", rw.DispatchResultsRw, rw, "a");
 			//  addConsumer("DEFO", this.dispatchResults, this, "a");
@@ -1107,7 +1245,7 @@ qx.Class.define("ava.IdleRaidUnitsTable", {
 
 			//tm.removeRows( 0, tm.getRowCount() );
 			var excludeIfTxt = rw.excludeIf.getValue();
-			var excludeShips = rw.excludeShips.getValue();
+			var excludeShips = this.excludeShips;
 			var excludeRefs = "";
 			var hasExcludes = false;
 			var excludeTs = Number(rw.excludeTs.getValue());
@@ -1201,7 +1339,7 @@ qx.Class.define("ava.IdleRaidUnitsTable", {
 			}
 			tm.setData(idleCities);
 			tm.sortByColumn((sortIx >= 0) ? sortIx : "1", (sortIx >= 0) ? dir : false);
-			if(!rw.autoUpdate.getValue()) {
+			if(!rw.autoUpdate) {
 				removeConsumer("COMO", rw.DispatchResultsRw, rw);
 			}
 			rw.nextIdleCityButton.setEnabled(true);
@@ -1221,6 +1359,7 @@ qx.Class.define("ava.RaidingWindow", {
 		_lists:              null,
 		_continents:         null,
 		_count:              0,
+		//saveProperties : ["raidMode", "ratioMode","avaRaidMode",
 		wcLabel:             null,
 		curDungeon:          null,
 		bossUnitLabel:       null,
@@ -1236,6 +1375,11 @@ qx.Class.define("ava.RaidingWindow", {
 		ratioMode:           "count",
 		raidMode:            0,
 		AvaRaidMode:         1,
+		wantWood:            true,
+		wantStone:           false,
+		autoUpdate:          false,
+		excludeShips:        false,
+		split:               false,
 		raidErrorWin:        null,
 		tabview:             null,
 		dungeonProgressData: [
@@ -3316,7 +3460,9 @@ qx.Class.define("ava.RaidingWindow", {
 				height:         500
 			});
 			console.log("build ui raiding 1");
-
+			this.wantWood = true;
+			this.wantStone = false;
+			this.split.persistMe = true;
 			this.setMaxHeight(500);
 			webfrontend.gui.Util.formatWinClose(this);
 			console.log("build ui raiding 2");
@@ -3361,6 +3507,7 @@ qx.Class.define("ava.RaidingWindow", {
 				_this.addListener("disappear", _this.onClose, _this);
 			}, 1.0); // wait for 1 second so that it doesn't recurse
 			//this.addListener("resize", this.onResize, this);
+			RaidingWindowLoad(this);
 
 		},
 		onResize:            function(e) {
@@ -3504,7 +3651,7 @@ qx.Class.define("ava.RaidingWindow", {
 					var avg = this.dungeonProgressData[dpt][dpl][dpp][1].toString();
 					var subcontainer = new qx.ui.container.Composite();
 					subcontainer.setLayout(new qx.ui.layout.Basic());
-					btn = new qx.ui.form.Button("Add").set({
+					var btn = new qx.ui.form.Button("Add").set({
 						paddingLeft:   5,
 						paddingRight:  5,
 						paddingTop:    0,
@@ -3662,7 +3809,7 @@ qx.Class.define("ava.RaidingWindow", {
 				num = num.substring(0, pos);
 			}
 			;
-			if(num.length == 0 || isNaN(num)) {
+			if(num.length == 0 ) {
 				return "";
 			}
 			var val = "";
@@ -3881,32 +4028,10 @@ qx.Class.define("ava.RaidingWindow", {
 				this.targetTable.refresh();
 			});
 			container.add(btn);
-			RaidingWindowLoad(this);
 
-			var value = localStorage.getItem("mt__autoUpdateCB");
-			this.autoUpdate = new qx.ui.form.CheckBox("Rfrsh").set({
-				marginLeft: 2
-			});
-			;
-			this.autoUpdate.setToolTipText("If unchecked, the data won't refresh until you click the refresh button.<br/>May solve some performance issues with flashing screen.");
-			container.add(this.autoUpdate);
-			this.autoUpdate.setValue(value == null || value.toLowerCase() == "true");
-			this.autoUpdate.addListener("changeValue", function(e) {
-				var val = this.autoUpdate.getValue();
-				localStorage.setItem("mt__autoUpdateCB", val);
-			}, this);
-			value = localStorage.getItem("mt__excludeShipsCB");
-			this.excludeShips = new qx.ui.form.CheckBox("No ships").set({
-				marginLeft: 3
-			});
-			;
-			this.excludeShips.setToolTipText("Won't list ships when checked");
-			container.add(this.excludeShips);
-			this.excludeShips.setValue(value != null && value.toLowerCase() == "true");
-			this.excludeShips.addListener("changeValue", function(e) {
-				var val = this.excludeShips.getValue();
-				localStorage.setItem("mt__excludeShipsCB", val);
-			}, this);
+
+			CreateCheckBox(this, "autoUpdate", container, "If unchecked, the data won't refresh until you click the refresh button.<br/>May solve some performance issues with flashing screen.");
+			CreateCheckBox(this, "excludeShips", container, "Won't list ships when checked");
 			container.add(new qx.ui.core.Spacer(), {
 				flex: 1
 			});
@@ -3917,7 +4042,7 @@ qx.Class.define("ava.RaidingWindow", {
 			});
 			excludeLabel.setValue("Min ts");
 			container.add(excludeLabel);
-			value = localStorage.getItem("mt__excludeTsLt");
+			var value = localStorage.getItem("mt__excludeTsLt");
 			this.excludeTs = new qx.ui.form.TextField();
 			this.excludeTs.setWidth(40);
 			this.excludeTs.addListener("input", function(e) {
@@ -3968,7 +4093,6 @@ qx.Class.define("ava.RaidingWindow", {
 
 			//ava.IdleRaidUnitsTable.getInstance().setHeight(300);
 			btn.targetTable = ava.IdleRaidUnitsTable.getInstance();
-			btn.autoUpdate = this.autoUpdate;
 			return idleUnitsPage;
 		},
 		cityGroupSelected:      function(e) {
@@ -4131,9 +4255,9 @@ qx.Class.define("ava.RaidingWindow", {
 					case 0:
 					{
 						if(currentData != "0")
-							m.setValue(0, row, "0");
+							this.getTableModel().setValue(0, row, "0");
 						else
-							m.setValue(0, row, "1");
+							this.getTableModel().setValue(0, row, "1");
 					}
 						break;
 					case 3:
@@ -4309,7 +4433,7 @@ qx.Class.define("ava.RaidingWindow", {
 				for(var ii = 0; ii < numRows; ++ii) {
 					if(data[ii][6] == "max") {
 						var rpt = parseInt(data[ii][7]);
-						for(b = rpt; b > 0; --b) {
+						for(var b = rpt; b > 0; --b) {
 							var sndUnits = [];
 							for(var a = 0; a < units.length; ++a) {
 								if(units[a].c > 0) {
@@ -4453,10 +4577,10 @@ qx.Class.define("ava.RaidingWindow", {
 		},
 		GetDungeonModifier:     function(dungeonType) {
 			var rv = 1;
-			if(this.wantWood.getValue() && dungeonType == 5)
+			if(this.wantWood && dungeonType == 5)
 				rv *= distWantModifier;
 
-			if(this.wantStone.getValue() && dungeonType == 3)
+			if(this.wantStone && dungeonType == 3)
 				rv *= distWantModifier;
 
 			return rv;
@@ -4589,24 +4713,13 @@ qx.Class.define("ava.RaidingWindow", {
 			subContainer.add(new qx.ui.basic.Label("Troops").set({
 				alignY: "middle"
 			}));
-			this.split = new qx.ui.form.CheckBox("Split").set({
-				marginLeft: 5
-			});
-			this.split.setToolTipText("If checked, adds as many groups as possible at around the level indicated.");
-			this.split.initValue(false);
-			subContainer.add(this.split);
-			this.wantWood = new qx.ui.form.CheckBox("wantWood").set({
-				marginLeft: 5
-			});
-			this.wantWood.setToolTipText("If checked, forests are favoured when dungeontype is flexible.\nCan be used with wantStone.\nExample:  If a the best mountain is up to 5 away and the best forest is 7 away, it will choose the forest.\nIf the mountain is closer or the forest farther, it will choose the mountain.\nThe setting will have no effect if there a many close forest dungeons.");
-			this.wantWood.initValue(localStorage.getItem("mm__wantWood"));
-			subContainer.add(this.wantWood);
-			this.wantStone = new qx.ui.form.CheckBox("wantStone").set({
-				marginLeft: 5
-			});
-			this.wantStone.setToolTipText("See 'getWood'.\n");
-			this.wantStone.initValue(localStorage.getItem("mm__wantStone") ? true : false);
-			subContainer.add(this.wantStone);
+			(CreateCheckBox(this, "split", subContainer, "If checked, adds as many groups as possible at around the level indicated."));
+
+			(CreateCheckBox(this, "wantWood", subContainer,
+				"If checked, forests are favoured when dungeontype is flexible.\nCan be used with wantStone.\nExample:  If a the best mountain is up to 5 away and the best forest is 7 away, it will choose the forest.\nIf the mountain is closer or the forest farther, it will choose the mountain.\nThe setting will have no effect if there a many close forest dungeons."));
+
+
+			CreateCheckBox(this, "wanStone", subContainer, "see wantWood");
 
 			subContainer.add(new qx.ui.core.Spacer(), {
 				flex: 1
@@ -4769,15 +4882,6 @@ qx.Class.define("ava.RaidingWindow", {
 				localStorage.setItem("mm__delayDayOpts", e.getData()[0].getLabel());
 			});
 			SetSelectionFromStore(sel, "mm__delayDayOpts");
-			if(value != null) {
-				var opts = sel.getChildren();
-				for(var ii = 0; ii < opts.length; ++ii) {
-					if(opts[ii].getLabel() == value) {
-						sel.setSelection([opts[ii]]);
-						break;
-					}
-				}
-			}
 
 			this.departOptions = new qx.ui.form.SelectBox().set({
 				width:    88,
@@ -4794,7 +4898,7 @@ qx.Class.define("ava.RaidingWindow", {
 			this.departOptions.add(new qx.ui.form.ListItem("45 min", null, 45));
 			this.departOptions.add(new qx.ui.form.ListItem("60 min", null, 60));
 			subContainer.add(this.departOptions);
-			value = localStorage.getItem("mm__departOpts");
+			var value = localStorage.getItem("mm__departOpts");
 			if(value != null) {
 				var opts = this.departOptions.getChildren();
 				for(var ii = 0; ii < opts.length; ++ii) {
@@ -4818,7 +4922,7 @@ qx.Class.define("ava.RaidingWindow", {
 				enabled:       false,
 				toolTipText:   "Next idle city"
 			});
-			this.nextIdleCityButton.addListener("click", this.nextIdleRaidCity,this);
+			this.nextIdleCityButton.addListener("click", this.nextIdleRaidCity, this);
 			subContainer.add(this.nextIdleCityButton);
 
 			btn = new qx.ui.form.Button("GO").set({
@@ -4954,7 +5058,7 @@ qx.Class.define("ava.RaidingWindow", {
 				paddingBottom: 0
 			});
 			btn.rw = this;
-			btn.addListener("click", this.findAllDungeons,this);
+			btn.addListener("click", this.findAllDungeons, this);
 			subContainer.add(btn);
 			this.commandContainer.add(subContainer);
 			container.add(this.commandContainer);
@@ -5070,6 +5174,7 @@ qx.Class.define("ava.RaidingWindow", {
 			return retVal;
 		},
 		isDefense:              function() {
+			var CI = webfrontend.data.City.getInstance();
 			var retVal = true;
 			for(var key in CI.units) {
 				switch(key) {
@@ -5266,10 +5371,10 @@ qx.Class.define("ava.RaidingWindow", {
 				for(var key in CI.units) {
 					switch(key) {
 						case "17":
-							retVal |= true;
+							retVal = true;
 							break;
 						default:
-							retVal |= false;
+							//retVal |= false;
 							break;
 					}
 				}
@@ -5384,6 +5489,7 @@ qx.Class.define("ava.RaidingWindow", {
 		},
 		findAllDungeons:        function() {
 			RaidingWindowSave(this);
+			CreateTree(this, this);
 
 			this.findDungeonsI(false);
 		},
@@ -5472,8 +5578,8 @@ qx.Class.define("ava.RaidingWindow", {
 								if(this.ratioMode != "total" && delayedOrders.hasOwnProperty(hch[k].unitType)) {
 									tcnt -= delayedOrders[parseInt(hch[k].unitType)];
 								}
-								var cnt = Math.floor((lootToCarry / totalCarry) * tcnt);
-								hch[k].setValue(cnt.toString());
+								var cntI = Math.floor((lootToCarry / totalCarry) * tcnt);
+								hch[k].setValue(cntI.toString());
 							}
 						}
 					}
@@ -5481,13 +5587,13 @@ qx.Class.define("ava.RaidingWindow", {
 			} else {
 				// set the other unit types to the same percentage, and then set the total loot field
 				var uinfo = CI.getUnitTypeInfo(unitType);
-				var cnt = Number(textField.getValue());
+				var cntI = Number(textField.getValue());
 				var tcnt = uinfo[this.ratioMode];
 				if((this.ratioMode != "total") && delayedOrders.hasOwnProperty(unitType)) {
 					tcnt -= delayedOrders[parseInt(unitType)];
 				}
-				var pct = cnt == 0 ? 0 : cnt / tcnt;
-				var lootTotal = cnt * bS.units[unitType].c;
+				var pct = cntI == 0 ? 0 : cntI / tcnt;
+				var lootTotal = cntI * bS.units[unitType].c;
 				var hch = textField.getLayoutParent().getChildren();
 				for(var k = 0; k < hch.length; k++) {
 					if(hch[k] instanceof qx.ui.form.TextField) {
@@ -5498,12 +5604,12 @@ qx.Class.define("ava.RaidingWindow", {
 							} else {
 								uinfo = CI.getUnitTypeInfo(hch[k].unitType);
 								if(this.ratioMode == "none") {
-									cnt = Number(hch[k].getValue());
+									cntI = Number(hch[k].getValue());
 								} else {
-									cnt = Math.floor(pct * tcnt);
-									hch[k].setValue(cnt.toString());
+									cntI = Math.floor(pct * tcnt);
+									hch[k].setValue(cntI.toString());
 								}
-								lootTotal = lootTotal + cnt * bS.units[hch[k].unitType].c;
+								lootTotal = lootTotal + cntI * bS.units[hch[k].unitType].c;
 							}
 						}
 					}
@@ -5910,7 +6016,7 @@ qx.Class.define("ava.RaidingWindow", {
 				var numRaids = 0;
 				while(dArray.length > 0 && AvailOrders > 0) {
 					cnt = 0;
-					for(ii = 0; ii < dArray.length && cnt == 0; ++ii) {
+					for(var ii = 0; ii < dArray.length && cnt == 0; ++ii) {
 
 						var d = new dung(dArray[ii][0], dArray[ii][1], dArray[ii][2], dArray[ii][7], dArray[ii][4]);
 						;
@@ -5940,10 +6046,8 @@ qx.Class.define("ava.RaidingWindow", {
 				this.pickAndSendRaids();
 				return;
 			}
-
-			// save settings here in cast we crash or browser closes
-			localStorage.setItem("mm__wantStone", this.wantStone.getValue());
-			localStorage.setItem("mm__wantWood", this.wantWood.getValue());
+			// just in case we crash
+			RaidingWindowSave(this);
 
 			var isAutoRaid = this.AvaRaidMode > 1;
 			if(!isAutoRaid) {
@@ -6141,6 +6245,7 @@ qx.Class.define("ava.RaidingWindow", {
 			} else if(result.r0 == 0 && result.r1 == 0) {
 				v.destroy();
 			} else {
+				var logEntry;
 				switch(result.r0) {
 					case 0:
 						logEntry = "Successful raid sent";
@@ -6468,4 +6573,358 @@ qx.Class.define("ava.RaidingWindow", {
 		}
 	}
 });
-;
+
+
+
+function CreateTree(rw, win) {
+
+	//qx.Class.include(qx.ui.treevirtual.TreeVirtual,
+	//	qx.ui.treevirtual.MNode);
+	//	root = qx.data.marshal.Json.createModel(root, true)
+	//createRandomData(root);
+	var hBox = new qx.ui.container.Composite(new qx.ui.layout.HBox(20));
+     win.$$parent.add(hBox, { edge : 8 });
+
+	var tree = new qx.ui.treevirtual.TreeVirtual([
+            "Tree",
+            "Data 1",
+            "Data 2",
+          ]);
+			tree.set({
+				allowMaximize:  true,
+				allowMinimize:  true,
+				showMaximize:   true,
+				showMinimize:   true,
+				showStatusbar:  true,
+				showClose:      true,
+				useMoveFrame:   true,
+				resizable:      true
+			});
+
+
+	tree.setAlwaysShowOpenCloseSymbol(true);
+	tree.setSelectionMode( qx.ui.treevirtual.TreeVirtual.SelectionMode.MULTIPLE_INTERVAL);
+   // Obtain the resize behavior object to manipulate
+      var resizeBehavior = tree.getTableColumnModel().getBehavior();
+
+      // Ensure that the tree column remains sufficiently wide
+      resizeBehavior.set(0, { width:"1*", minWidth:180  });
+
+      hBox.add(tree);
+
+
+	// tree data model
+	var dataModel = tree.getDataModel();
+
+var te = dataModel.addBranch(te1, "Workspace", true);
+	dataModel.addLeaf(te, "Windows (C:)");
+	dataModel.addLeaf(te, "Documents (D:)");
+
+	var te1 = dataModel.addBranch(null, "Desktop", true);
+
+	dataModel.addBranch(te1, "Files", true);
+
+
+	dataModel.addBranch(te1, "Trash", true);
+	dataModel.addBranch(te1, "Sent", false);
+	dataModel.addBranch(te1, "Trash", false);
+	dataModel.addBranch(te1, "Data", false);
+	dataModel.addBranch(te1, "Edit", false);
+
+	tree.nodeSetLabelStyle(te,
+                             "background-color: red; " +
+                             "color: white;" +
+                             "font-weight: bold;");
+
+
+	dataModel.setData();
+
+var commandFrame = new qx.ui.groupbox.GroupBox("Control");
+      commandFrame.setLayout(new qx.ui.layout.VBox(8));
+
+      hBox.add(commandFrame);
+
+      var o = new qx.ui.basic.Atom("Current Selection: ");
+      commandFrame.add(o);
+
+      o = new qx.ui.form.TextField();
+      o.set({ readOnly: true });
+      commandFrame.add(o);
+
+//
+// panels
+//
+
+      tree.addListener(
+        "changeSelection",
+        function(e)
+        {
+          // Get the list of selected nodes.  We're in single-selection mode,
+          // so there will be only one of them.
+          var nodes = e.getData();
+          this.setValue(tree.getHierarchy(nodes[0].nodeId).join('/'));
+          buttonRemove.setEnabled(true);
+        },
+        o);
+
+      var buttonRemove = new qx.ui.form.Button("Remove");
+      buttonRemove.set({ enabled: false });
+      commandFrame.add(buttonRemove);
+      buttonRemove.addListener(
+        "execute",
+        function(e)
+        {
+          var selectedNodes = tree.getSelectedNodes();
+          for (var i = 0; i < selectedNodes.length; i++)
+          {
+            dataModel.prune(selectedNodes[i].nodeId, true);
+            dataModel.setData();
+          }
+        });
+
+      o = new qx.ui.form.CheckBox("Use tree lines if theme supports them?");
+      o.set({ value: true });
+      commandFrame.add(o);
+      o.addListener("changeValue",
+                    function(e)
+                    {
+                      tree.setUseTreeLines(e.getData());
+                    });
+
+      o = new qx.ui.form.CheckBox("Exclude first-level tree lines?");
+      o.set({ value: false });
+      commandFrame.add(o);
+      o.addListener("changeValue",
+                    function(e)
+                    {
+                      tree.setExcludeFirstLevelTreeLines(e.getData());
+                    });
+
+      o = new qx.ui.form.CheckBox("Always show open/close symbol?");
+      o.set({ value: true });
+      commandFrame.add(o);
+      o.addListener("changeValue",
+                    function(e)
+                    {
+                      tree.setAlwaysShowOpenCloseSymbol(e.getData());
+                    });
+
+      o = new qx.ui.form.CheckBox("Remove open/close if found empty?");
+      o.set({ value: true });
+      commandFrame.add(o);
+      tree.addListener("treeOpenWhileEmpty",
+                       function(e)
+                       {
+                         if (this.getValue())
+                         {
+                           var node = e.getData();
+                           tree.nodeSetHideOpenClose(node, true);
+                         }
+                       },
+                       o);
+
+      o = new qx.ui.form.CheckBox("Open/close click selects row?");
+      o.set({ value: false });
+      commandFrame.add(o);
+      o.addListener("changeValue",
+                    function(e)
+                    {
+                      tree.setOpenCloseClickSelectsRow(e.getData());
+                    });
+
+      o = new qx.ui.form.CheckBox("Disable the tree?");
+      o.set({ value: false });
+      commandFrame.add(o);
+      o.addListener("changeValue",
+                    function(e)
+                    {
+                      tree.setEnabled(! e.getData());
+                    });
+
+      o = new qx.ui.form.CheckBox("Show column visibilty menu");
+      o.set({ value: true });
+      commandFrame.add(o);
+      o.addListener("changeValue",
+                    function(e)
+                    {
+                      tree.setColumnVisibilityButtonVisible(e.getData());
+                    });
+
+
+   // panels
+   //
+
+
+
+	var newItem = 1;
+
+	/**
+	 * Each time we get a treeOpenWithContent event, add yet another leaf
+	 * node to the node being opened.
+	 */
+	tree.addListener("treeOpenWithContent",
+		/**
+		 * @lint ignoreDeprecated(alert)
+		 */
+			function(e) {
+			var node = e.getData();
+			dataModel.addLeaf(node.nodeId, newItem.toString());
+			newItem++;
+			dataModel.addBranch(node.nodeId, newItem.toString(), false);
+			dataModel.setColumnData(node.nodeId,2, "full" );
+			++newItem;
+		});
+	//tree.setDelegate(delegate);
+	tree.addListener("treeClose",
+		/**
+		 * @lint ignoreDeprecated(alert)
+		 */
+			function(e) {
+			var node = e.getData();
+
+			dataModel.setColumnData(node.nodeId,2, ["close", "open"] );
+			dataModel.prune(node.nodeId, false);
+		});
+
+	/*
+	 * We handle opening an empty folder specially.  We demonstrate how to
+	 * disable the open/close symbol once we've determined there's nothing
+	 * in it.  This feature might be used to dynamically retrieve the
+	 * contents of the folder, and if nothing is available, indicate it by
+	 * removing the open/close symbol.
+	 */
+	tree.addListener("treeOpenWhileEmpty",
+		/**
+		 * @lint ignoreDeprecated(alert)
+		 */
+			function(e) {
+			var node = e.getData();
+			dataModel.addLeaf(node.nodeId, newItem.toString());
+			newItem++;
+			dataModel.addBranch(node.nodeId, newItem.toString(), false);
+			dataModel.setColumnData(node.nodeId,1, "empty");
+			++newItem;
+		});
+
+
+	tree.addListener("changeSelection",
+		/**
+		 * @lint ignoreDeprecated(alert)
+		 */
+			function(e) {
+			var selectedNodes = e.getData();
+			selectedNodes.forEach( c => dataModel.setColumnData( c.nodeId,2, "sel "));
+
+
+		});
+}
+function dungName(dungType) {
+	switch(dungType) {
+		case 2:
+			return "Sea";
+		case 3:
+			return "Hill";
+		case 4:
+			return "Mountain";
+		case 5:
+			return "Forest";
+	}
+	return "Unknown";
+}
+
+function dungProgressType(dungType) {
+	switch(dungType) {
+		case 4:
+			return 1;
+	}
+	return 0;
+	// use the forest progress
+}
+
+function bossName(bossType) {
+	switch(bossType) {
+		case 6:
+			return "Dragon";
+		case 7:
+			return "Moloch";
+		case 8:
+			return "Hydra";
+		case 12:
+			return "Octopus";
+	}
+	return "Unknown";
+}
+
+ function getBossType(bossName) {
+	switch(bossName) {
+		case "Dragon":
+			return 6;
+		case "Moloch":
+			return 7;
+		case "Hydra":
+			return 8;
+		case "Octopus":
+			return 12;
+	}
+	return 0;
+}
+
+ function bossUnitType(bossType, bossLevel) {
+	var ut = null;
+	switch(bossType) {
+		case 6:
+			// dragon
+			ut = [33, 36, 39, 42, 45, 48, 49, 50, 51, 52];
+			break;
+		case 8:
+			// hydra
+			ut = [34, 37, 40, 43, 46, 53, 54, 55, 56, 57];
+			break;
+		case 7:
+			// moloch
+			ut = [35, 38, 41, 44, 47, 58, 59, 60, 61, 62];
+			break;
+		case 12:
+			// octopus
+			ut = [67, 68, 69, 70, 71, 72, 73, 74, 75, 76];
+			break;
+	}
+	return ut[parseInt(bossLevel) - 1];
+}
+function SelectByName(value, list) {
+	if(value !== null) {
+		var opts = list.getChildren();
+		for(var ii = 0; ii < opts.length; ++ii) {
+			if(opts[ii].getLabel() === value) {
+				list.setSelection([opts[ii]]);
+				break;
+			}
+		}
+	}
+}
+
+function SelectFromStorage(value, list) {
+	 SelectByName(localStorage.getItem(value), list);
+}
+
+	function SetSelection(sel, value) {
+		if(value === null || value === undefined)
+			return 0;
+		var opts = sel.getChildren();
+		for(var ii = 0; ii < opts.length; ++ii) {
+			if(opts[ii].getLabel() === value) {
+				sel.setSelection([opts[ii]]);
+				return ii;
+			}
+		}
+		return 0;
+	}
+
+	function SetSelectionFromStore(sel, key) {
+		var value = localStorage.getItem(key);
+		if(value != null) {
+			console.log(key + " == " + value.toString());
+			return SetSelection(sel, value);
+		}
+	}
+

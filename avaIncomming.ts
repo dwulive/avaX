@@ -16,6 +16,32 @@ declare var qx : any;
 	 }
 	 return i;
  }
+class incomingAttackInfo
+{
+public	    tp: number; //playerId,
+public 		tpn: number; //bY,
+public 		t: number; //cf[i].type,
+public 		s: number; //cf[i].state,
+public 		tcn: number; //cf[i].targetCityName,
+public 		tc: number; //cf[i].targetCity,
+public 		es: number; //cf[i].end,
+public 		pn: number; //cf[i].playerName,
+public 		cn: number; //cf[i].cityName,
+public 		an: number; //cf[i].allianceName,
+public 		a: number; //cf[i].alliance,
+public 		ds: number; //cf[i].detectionStep,
+public 		ta: number; //cf[i].ts_attacker,
+public 		cp: number; //cf[i].claimPower,
+public 		b: number; //cf[i].hasBaron,
+public 		td: number; //cf[i].ts_defender,
+public 		p: number; //cf[i].player,
+public 		c: number; //cf[i].city,
+public 		i: number; //cf[i].id,
+public 		thc: number; //cd,
+public 		m: number; //cf[i].isMoongate,
+public 		ms: number; //cf[i].stepMoongate,
+public 		command: number; //cf[i]
+}
 
 function formatIncomingDate(dte) {
 	var serverDiff = webfrontend.data.ServerTime.getInstance().getDiff();
@@ -143,7 +169,7 @@ qx.Class.define("ava.IncomingAttacksWindow", {
 		_subText:             null,
 		_table:               null,
 		_contSelect:          null,
-		_incomingAttacks:     new Array(),
+		_incomingAttacks:     [],
 		_outgoingAttacks:     new Array(),
 		_filterOwn:           null,
 		_allianceBonuses:     new Object(),
@@ -320,7 +346,13 @@ qx.Class.define("ava.IncomingAttacksWindow", {
 			//firstRow.add(lbl);
 			this._contSelect.addListener("changeSelection", this.redrawGrid, this);
 			this._table = new qx.ui.table.model.Simple();
-			var columnNames = ["MG", "Internal", "Player", "Target", "Cont", "Coords", "Time", "Attacker", "Alliance", "Source", "AttCoords", "Spotted", "Baron", "Siege", "Infantry", "Cav", "Scout", "Ship", "allianceId", "Travel Time"];
+			var columnNames = ["MG", "Internal", "Player", "Target", "Cont", "Coords", "Time", "Attacker", "Alliance", "Source", "AttCoords", "Spotted", "Baron", "Siege", "Infantry", "Cav",
+			"Scout", "Ship", "allianceId", "Travel Time",
+			"Defense\nat eta", "Defense<br>at max","%inf @eta", "%cav eta","%magic eta","%art eta",
+															"%inf max", "%cav max","%magic @max","%art max",
+																"Last\nseen TT",
+																"Attacker TS", "Walls"
+			];
 			var columnIDs = columnNames;
 			this._table.setColumnIds(columnIDs);
 			this._table.setColumns(columnNames);
@@ -334,17 +366,23 @@ qx.Class.define("ava.IncomingAttacksWindow", {
 			//columnModel.setColu"mnVisible( 3, false );
 			var shipRenderer = new qx.ui.table.cellrenderer.Conditional();
 			shipRenderer.addRegex("^[\\?]", "center", "blue", "text-decoration:underline", "normal", null);
+						var colorZeroCnd = new qx.ui.table.cellrenderer.Conditional();
+						colorZeroCnd.addRegex("[\!]", "center", "blue", "text-decoration:underline", "normal", null);
+
 			var mgStyle = new qx.ui.table.cellrenderer.Image();
 			var linkStyle = new qx.ui.table.cellrenderer.Default();
 			linkStyle.setDefaultCellStyle("text-decoration:underline;color:blue");
+						columnModel.setColumnVisible(0, false);
+						columnModel.setColumnVisible(1, false);
+
 			columnModel.setDataCellRenderer(0, mgStyle);
 			columnModel.setDataCellRenderer(2, linkStyle);
 			columnModel.setDataCellRenderer(3, linkStyle);
-			columnModel.setDataCellRenderer(5, linkStyle);
-			columnModel.setDataCellRenderer(7, linkStyle);
-			columnModel.setDataCellRenderer(8, linkStyle);
-			columnModel.setDataCellRenderer(9, linkStyle);
-			columnModel.setDataCellRenderer(10, linkStyle);
+						columnModel.setDataCellRenderer(5, colorZeroCnd);
+						columnModel.setDataCellRenderer(7, colorZeroCnd);
+						columnModel.setDataCellRenderer(8, colorZeroCnd);
+						columnModel.setDataCellRenderer(9, colorZeroCnd);
+						columnModel.setDataCellRenderer(10, colorZeroCnd);
 			columnModel.setDataCellRenderer(17, shipRenderer);
 			columnModel.setColumnWidth(0, 30);
 			columnModel.setColumnWidth(1, 50);
@@ -565,11 +603,12 @@ qx.Class.define("ava.IncomingAttacksWindow", {
 		 */
 		redrawGrid:           function(e) {
 			try {
+							var _this = ava.IncomingAttacksWindow.getInstance();
+							console.assert(_this == this);
 				var rowData = [];
 				var sortIx = this._table.getSortColumnIndex();
 				var dir = this._table.isSortAscending();
 				var mAid = aco.getId();
-
 				if(this._incomingAttacks != null) {
 					var selection = this._contSelect.getSelection();
 					var continent = ((selection && selection.length > 0) ? selection[0].getModel() : "-1");
@@ -577,10 +616,9 @@ qx.Class.define("ava.IncomingAttacksWindow", {
 					var filterOwn = this._filterOwn.getValue();
 					for(var i = 0; i < this._incomingAttacks.length; i++) {
 						try {
-
+							var item : incomingAttackInfo = this._incomingAttacks[i];
 							var incomingStr = ["", "", "", "", "", ""];
 							var travelDurationMs = 0;
-							var item = this._incomingAttacks[i];
 							var cont = ava.CombatTools.cityIdToCont(item.tc);
 							var cont2 = ava.CombatTools.cityIdToCont(item.c);
 							if((continent == "-1" || cont == continent) && (!filterOwn || item.tpn == this.pName)) {
@@ -602,8 +640,10 @@ qx.Class.define("ava.IncomingAttacksWindow", {
 								var typeCount = 5;
 								var IncomingShip = "?";
 								if(besieged) {
-									for(var i = 0; i < typeCount; ++i)
-										incomingStr[i] = "Siege";
+												for(var t = 0; t < incomingStr.length; ++t) {
+													incomingStr[t] = "sge:" + item.cp;
+												}
+
 								} else {
 									try {
 										var gains = [8, 10, 20, 30, 40];
@@ -619,24 +659,25 @@ qx.Class.define("ava.IncomingAttacksWindow", {
 										}
 
 										var bestError = 5;
+													var bestId=0;
 										var foundType = false;
 										for(var ii = 0; ii < typeCount; ++ii) {
 											var tt = (gains[ii] * 60.0 - 1) * 100.0 / diffSec - bias[ii];
 
-											incomingStr[ii] = Math.abs(tt).toString() + "%";
+														incomingStr[ii] =( Math.abs(tt) < 99 ? Math.abs(tt).toString() : "99") + "%";
 											if(tt < 55 && tt > -5) {
-												var rr = tt - Math.floor(tt / 5.0 + 0.375) * 5.0;
-												if(rr < 0)
-													rr = -rr * 4.0;
+															var rr = tt >0 ? tt - Math.floor(tt / 5.0 + 0.25) * 5.0 : -tt;
 												if(Math.abs(rr) < bestError) {
 													bestError = Math.abs(rr);
 													foundType = true;
-													incomingStr[ii] = rr.toString() + "%!!";
+																bestId = ii;
+															//	incomingStr[ii] = rr.toString() + "%!!";
 												}
 											}
 
 										}
-
+														if( bestError < 3 )
+															incomingStr[bestId] = "0%!";
 										IncomingShip = (cont != cont2) ? "*" : "?";
 
 										if(!foundType) {
@@ -653,8 +694,19 @@ qx.Class.define("ava.IncomingAttacksWindow", {
 									for(var i = 0; i < typeCount; ++i)
 										incomingStr[i] = "?";
 								}
+							/*	var columnNames = ["MG", "Internal", "Player", "Target", "Cont", "Coords", "Time", "Attacker", "Alliance", "Source", "AttCoords", "Spotted", "Baron", "Siege", "Infantry", "Cav",
+									"Scout", "Ship", "allianceId", "Travel Time"
+									"Defense\nat eta", "Defense<br>at max","%inf @eta", "%cav eta","%magic eta","%art eta",
+									"%inf max", "%cav max","%magic @max","%art max",
+									"Last\nseen TT",
+									"Attacker TS", "Attacker Type");
+							];*/
 								var isInternal = (mAid == item.a);
-								rowData.push([(item.m ? "webfrontend/world/icon_wm_city_moongate.png" : ""), (isInternal ? "Internal " : ""), item.tpn, item.tcn, cont, ava.CoordUtils.convertIdToCoodrinates(item.tc), formatIncomingDate(this.serverTime.getStepTime(item.es)), item.pn, item.an, item.cn, ava.CoordUtils.convertIdToCoodrinates(item.c), formatIncomingDate(this.serverTime.getStepTime(item.ds)), incomingStr[4], incomingStr[3], incomingStr[2], incomingStr[1], incomingStr[0], IncomingShip, item.a.toString(), FormatTime(travelDurationMs)]);
+											rowData.push([(item.m ? "webfrontend/world/icon_wm_city_moongate.png" : ""), (isInternal ? "Internal " : ""), item.tpn, item.tcn, cont, ava.CoordUtils.convertIdToCoodrinates(item.tc),
+												formatIncomingDate(this.serverTime.getStepTime(item.es)), item.pn, item.an, item.cn, ava.CoordUtils.convertIdToCoodrinates(item.c),
+												formatIncomingDate(this.serverTime.getStepTime(item.ds)), incomingStr[4],
+												incomingStr[3], incomingStr[2], incomingStr[1], incomingStr[0], IncomingShip, item.a.toString(), (besieged ? "~" : "") + FormatTime(travelDurationMs),
+												item.td, item.td, "0%", "0%","0%", "0%","0%", "0%","0%", "0%","No Intel", item.ta , "No Intel"] );
 
 
 							}
@@ -670,6 +722,8 @@ qx.Class.define("ava.IncomingAttacksWindow", {
 			} catch(ex1) {
 				paError(ex1);
 			}
+						console.log("redraw Grid leave");
+
 		},
 		safeGetProperty:      function(obj, prop) {
 			if(obj && obj.hasOwnProperty(prop))

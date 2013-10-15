@@ -4,21 +4,6 @@ declare var webfrontend : any;
 /**
  * Created by David on 10/11/13.
  */
-function SelectByName(value, list) {
-	if(value !== null) {
-		var opts = list.getChildren();
-		for(var ii = 0; ii < opts.length; ++ii) {
-			if(opts[ii].getLabel() === value) {
-				list.setSelection([opts[ii]]);
-				break;
-			}
-		}
-	}
-}
-
-function SelectFromStorage(value, list) {
-	 SelectByName(localStorage.getItem(value), list);
-}
 
 var nfTime = null;
 var nextFortune = null;
@@ -476,28 +461,6 @@ function AvaInitLegacy() {
 			}
 		}
 	}
-
-	function SetSelection(sel, value) {
-		if(value === null || value === undefined)
-			return 0;
-		var opts = sel.getChildren();
-		for(var ii = 0; ii < opts.length; ++ii) {
-			if(opts[ii].getLabel() === value) {
-				sel.setSelection([opts[ii]]);
-				return ii;
-			}
-		}
-		return 0;
-	}
-
-	function SetSelectionFromStore(sel, key) {
-		var value = localStorage.getItem(key);
-		if(value != null) {
-			console.log(key + " == " + value.toString());
-			return SetSelection(sel, value);
-		}
-	}
-
 
 
 
